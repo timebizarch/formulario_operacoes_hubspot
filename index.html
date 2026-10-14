@@ -58,6 +58,8 @@
   .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
   @media (max-width:560px){.row{grid-template-columns:1fr}}
   .field{min-width:0}
+  .section{font:600 12px/1.4 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-fg);margin:12px 0 -4px;padding-top:20px;border-top:1px solid var(--border)}
+  .section:first-child{margin-top:0;padding-top:0;border-top:0}
   label,.legend{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:var(--fg1)}
   .opt{font-weight:400;color:var(--fg3)}
   .hint{color:var(--fg3);font-size:13px;font-style:italic;margin-top:6px}
@@ -157,63 +159,90 @@ const CUSTO = [["proprietario","Proprietário"],["yuca","Yuca"],["yuker","Yuker"
 // Unidade = Produto do HubSpot (lista em products.json, atualizada todo dia pela GitHub Action)
 const UNIDADE = {name:"produto", label:"Unidade", type:"produto", required:true, placeholder:"Digite o nome do prédio ou da unidade"};
 
+// Todos os formulários seguem a mesma ordem de seções:
+// Unidade → Solicitante → Pedido → Data → Prioridade e custo → Informações adicionais
+const SEC = t => ({section:t});
+const PRIORIDADE_LBL = "Prioridade";
+const OUTRAS = name => ({name, label:"Outras informações", type:"textarea", required:false, placeholder:"Qualquer detalhe que ajude a equipe"});
+
 const FORMS = {
   manutencao: { title:"Chamado de manutenção", fields:[
+    SEC("Unidade"),
+    UNIDADE,
+    SEC("Solicitante"),
     {row:[
       {name:"nome_do_solicitante", label:"Seu nome", type:"text", required:true},
       {name:"tipo_de_cliente", label:"Quem pediu?", type:"select", required:true, options:[["Inquilino","Inquilino"],["Proprietário","Proprietário"],["Investidor","Investidor"],["Terceiro","Terceiro (prestador, condomínio…)"]]}]},
     {row:[
       {name:"manut_email", label:"E-mail", type:"email", required:true},
       {name:"manut_telefone", label:"Telefone", type:"tel", required:true, hint:"Com DDD"}]},
-    UNIDADE,
+    SEC("Pedido"),
     {row:[
-      {name:"momento_da_manutencao", label:"Momento", type:"select", required:true, options:[["Durante locação","Durante a locação"],["Move-in","Na entrada (move-in)"],["Vistoria de Saída","Na vistoria de saída"]]},
-      {name:"tipo_de_chamado", label:"Tipo de problema", type:"select", required:true, options:[["Infiltração/Vazamento","Infiltração ou vazamento"],["Elétrica","Elétrica"],["Ar condicionado","Ar condicionado"],["Fechadura","Fechadura"],["Gás","Gás"],["Pintura","Pintura"],["Problema estrutural","Problema estrutural"],["Outros","Outro"]]}]},
-    {name:"descricao_do_problema", label:"Descreva o problema", type:"textarea", required:true, placeholder:"O que aconteceu, onde fica no imóvel e desde quando"},
-    {name:"hs_ticket_priority", label:"Urgência", type:"select", required:true, options:[["LOW","Baixa"],["MEDIUM","Média"],["HIGH","Alta"],["URGENT","Urgente (risco à segurança ou ao imóvel)"]]},
+      {name:"tipo_de_chamado", label:"Tipo de problema", type:"select", required:true, options:[["Infiltração/Vazamento","Infiltração ou vazamento"],["Elétrica","Elétrica"],["Ar condicionado","Ar condicionado"],["Fechadura","Fechadura"],["Gás","Gás"],["Pintura","Pintura"],["Problema estrutural","Problema estrutural"],["Outros","Outro"]]},
+      {name:"momento_da_manutencao", label:"Momento", type:"select", required:true, options:[["Durante locação","Durante a locação"],["Move-in","Na entrada (move-in)"],["Vistoria de Saída","Na vistoria de saída"]]}]},
+    {name:"descricao_do_problema", label:"Descrição", type:"textarea", required:true, placeholder:"O que aconteceu, onde fica no imóvel e desde quando"},
+    SEC("Data"),
     {name:"horarios_disponiveis_para_visita", label:"Horários disponíveis para visita", type:"textarea", required:false, placeholder:"Ex.: 14/10 das 9h às 12h; 15/10 à tarde"},
+    SEC("Prioridade"),
+    {name:"hs_ticket_priority", label:PRIORIDADE_LBL, type:"select", required:true, options:[["LOW","Baixa"],["MEDIUM","Média"],["HIGH","Alta"],["URGENT","Urgente (risco à segurança ou ao imóvel)"]]},
+    SEC("Informações adicionais"),
     {name:"fotos_manutencao__drive_url", label:"Link das fotos ou vídeos", type:"url", required:false, hint:"Link de uma pasta do Google Drive, por exemplo"}
   ]},
   servico: { title:"Solicitação de serviço", fields:[
+    SEC("Unidade"),
     UNIDADE,
+    {name:"endereco_servico", label:"Endereço", type:"text", required:false},
+    SEC("Solicitante"),
     {row:[
-      {name:"quem_solicitou", label:"Quem solicitou?", type:"text", required:true},
-      {name:"chapter_solicitante", label:"Chapter solicitante", type:"select", required:true, options:CHAPTER}]},
+      {name:"quem_solicitou", label:"Seu nome", type:"text", required:true},
+      {name:"chapter_solicitante", label:"Chapter", type:"select", required:true, options:CHAPTER}]},
+    SEC("Pedido"),
     {name:"qual_servico", label:"Qual serviço?", type:"select", required:true, options:[["limpeza_move_in","Limpeza move in"],["limpeza_move_out","Limpeza move out"],["limpeza_extra","Limpeza extra"],["limpeza_preventiva","Limpeza preventiva"],["limpeza_reativa_feedback_de_visitas","Limpeza reativa (feedback de visitas)"],["limpeza_recorrente","Limpeza recorrente"],["dedetizacao","Dedetização"],["higienizacao","Higienização"],["jardinagem","Jardinagem"],["internet","Internet"],["cancelamento_internet","Cancelamento de internet"],["congelamento_de_internet","Congelamento de internet"],["contratacao_de_seguro","Contratação de seguro"],["cancelamento_seguro","Cancelamento de seguro"],["compra","Compra"],["outro_servico","Outro serviço"]]},
+    {name:"motivo_solicitacao", label:"Motivo da solicitação", type:"text", required:false},
     {name:"compras_item", label:"O que comprar?", type:"textarea", required:false, hint:"Só se o serviço envolver compra de itens"},
-    {name:"motivo_solicitacao", label:"Qual o motivo da solicitação?", type:"text", required:false},
-    {name:"endereco_servico", label:"Endereço do serviço", type:"text", required:false},
-    {name:"de_quem_custo", label:"De quem é o custo?", type:"select", required:true, options:CUSTO},
+    SEC("Data"),
     {row:[
-      {name:"data_solicitada", label:"Data para o serviço", type:"date", required:true},
+      {name:"data_solicitada", label:"Data", type:"date", required:true},
       {name:"horario_solicitado", label:"Horário", type:"time", required:true}]},
-    {name:"adicionar_etiqueta", label:"Prioridade", type:"checks", required:true, options:[["Prioridade alta","Prioridade alta"],["Importante, não urgente","Importante, não urgente"],["Fluxo normal","Fluxo normal"],["Coliving","Coliving"],["Re-limpeza","Re-limpeza"]]},
-    {name:"outras_informacoes", label:"Outras informações relevantes", type:"textarea", required:false}
+    SEC("Prioridade e custo"),
+    {name:"adicionar_etiqueta", label:PRIORIDADE_LBL, type:"checks", required:true, options:[["Prioridade alta","Prioridade alta"],["Importante, não urgente","Importante, não urgente"],["Fluxo normal","Fluxo normal"],["Coliving","Coliving"],["Re-limpeza","Re-limpeza"]]},
+    {name:"de_quem_custo", label:"De quem é o custo?", type:"select", required:true, options:CUSTO},
+    SEC("Informações adicionais"),
+    OUTRAS("outras_informacoes")
   ]},
   compras: { title:"Pedido de compra", fields:[
+    SEC("Unidade"),
     UNIDADE,
+    {name:"compras_endereco", label:"Endereço", type:"text", required:true},
+    SEC("Solicitante"),
     {row:[
-      {name:"quem_solicitou", label:"Quem solicitou?", type:"text", required:true},
-      {name:"chapter_solicitante", label:"Chapter solicitante", type:"select", required:true, options:CHAPTER}]},
-    {name:"compras_email_solicitante", label:"E-mail do solicitante", type:"email", required:true},
-    {name:"compras_item", label:"O que comprar?", type:"textarea", required:true, placeholder:"Item, quantidade e, se tiver, o link do produto"},
+      {name:"quem_solicitou", label:"Seu nome", type:"text", required:true},
+      {name:"chapter_solicitante", label:"Chapter", type:"select", required:true, options:CHAPTER}]},
+    {name:"compras_email_solicitante", label:"E-mail", type:"email", required:true},
+    SEC("Pedido"),
     {row:[
       {name:"compras_categoria", label:"Categoria do item", type:"select", required:true, options:[["eletrodomestico","Eletrodoméstico"],["moveis","Móveis"],["eletroportatil","Eletroportátil"],["utensilios","Utensílios"]]},
-      {name:"de_quem_custo", label:"De quem é o custo?", type:"select", required:true, options:CUSTO}]},
-    {name:"compras_motivo", label:"Qual o motivo da solicitação?", type:"text", required:false},
-    {name:"compras_endereco", label:"Endereço da unidade", type:"text", required:true},
-    {name:"compras_etiqueta", label:"Prioridade", type:"checks", required:true, options:[["prioridade_alta","Prioridade alta"],["importante_nao_urgente","Importante, não urgente"],["fluxo_normal","Fluxo normal"]]},
-    {name:"outras_informacoes", label:"Outras informações relevantes", type:"textarea", required:false}
+      {name:"compras_motivo", label:"Motivo da solicitação", type:"text", required:false}]},
+    {name:"compras_item", label:"O que comprar?", type:"textarea", required:true, placeholder:"Item, quantidade e, se tiver, o link do produto"},
+    SEC("Prioridade e custo"),
+    {name:"compras_etiqueta", label:PRIORIDADE_LBL, type:"checks", required:true, options:[["prioridade_alta","Prioridade alta"],["importante_nao_urgente","Importante, não urgente"],["fluxo_normal","Fluxo normal"]]},
+    {name:"de_quem_custo", label:"De quem é o custo?", type:"select", required:true, options:CUSTO},
+    SEC("Informações adicionais"),
+    OUTRAS("outras_informacoes")
   ]},
   chave: { title:"Pedido de chave", fields:[
-    {name:"chave_status", label:"Status da chave", type:"checks", required:true, options:[["Chave já cadastrada","Chave já cadastrada"],["Nova chave","Nova chave"],["Chave perdida","Chave perdida"]]},
+    SEC("Unidade"),
     UNIDADE,
-    {name:"chave_chapter", label:"Chapter do solicitante", type:"select", required:true, options:CHAPTER_CHAVE},
+    SEC("Solicitante"),
     {row:[
-      {name:"chave_solicitante", label:"Nome do solicitante", type:"text", required:true},
-      {name:"chave_telefone", label:"Telefone do solicitante", type:"tel", required:false, hint:"Com DDD"}]},
-    {name:"chave_data_evento", label:"Data da retirada ou devolução", type:"date", required:true},
-    {name:"chave_dono_info", label:"Quem vai retirar e devolver a chave", type:"textarea", required:true, placeholder:"Nome de quem retira, quem devolve e onde deixar a chave"}
+      {name:"chave_solicitante", label:"Seu nome", type:"text", required:true},
+      {name:"chave_chapter", label:"Chapter", type:"select", required:true, options:CHAPTER_CHAVE}]},
+    {name:"chave_telefone", label:"Telefone", type:"tel", required:false, hint:"Com DDD"},
+    SEC("Pedido"),
+    {name:"chave_status", label:"Status da chave", type:"checks", required:true, options:[["Chave já cadastrada","Chave já cadastrada"],["Nova chave","Nova chave"],["Chave perdida","Chave perdida"]]},
+    {name:"chave_dono_info", label:"Quem vai retirar e devolver a chave", type:"textarea", required:true, placeholder:"Nome de quem retira, quem devolve e onde deixar a chave"},
+    SEC("Data"),
+    {name:"chave_data_evento", label:"Data da retirada ou devolução", type:"date", required:true}
   ]}
 };
 
@@ -250,7 +279,7 @@ function render(t){
   document.querySelectorAll(".type").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.tipo===t)));
   const cfg = FORMS[t];
   $("#title").textContent = cfg.title;
-  $("#fields").innerHTML = cfg.fields.map(f => f.row ? `<div class="row">${f.row.map(fieldHTML).join("")}</div>` : fieldHTML(f)).join("");
+  $("#fields").innerHTML = cfg.fields.map(f => f.section ? `<h3 class="section">${esc(f.section)}</h3>` : f.row ? `<div class="row">${f.row.map(fieldHTML).join("")}</div>` : fieldHTML(f)).join("");
   $("#empty").hidden = true; $("#head").hidden = false; $("#actions").hidden = false; $("#msg").hidden = true;
   produtoEscolhido = null; setupCombo();
   $("#form").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
@@ -282,7 +311,7 @@ function collect(){
 }
 
 // ---------- Seletor de unidade ----------
-let PRODUTOS = null, produtoEscolhido = null;
+let PRODUTOS = null, produtoEscolhido = null, produtosErro = false;
 const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 const produtosPromise = fetch("products.json", {cache:"no-cache"}).then(r=>r.json()).then(rows=>{
   const count = {};
@@ -290,7 +319,7 @@ const produtosPromise = fetch("products.json", {cache:"no-cache"}).then(r=>r.jso
   // nomes repetidos ganham um código curto para diferenciar
   PRODUTOS = rows.map(([id,nome,adminId]) => ({id, nome, adminId, key:norm(nome),
     label: count[norm(nome)] > 1 ? `${nome} · ${adminId.slice(0,4)}` : nome}));
-}).catch(()=>{ PRODUTOS = []; });
+}).catch(()=>{ PRODUTOS = []; produtosErro = true; });
 
 function setupCombo(){
   const input = $("#f_produto"); if (!input) return;
@@ -301,19 +330,22 @@ function setupCombo(){
     produtoEscolhido = p; input.value = p.label; close();
     picked.textContent = `Unidade selecionada: ${p.nome}`; picked.hidden = false; field.classList.remove("invalid");
   };
+  let msgVazia = "Digite pelo menos 2 letras do nome do prédio ou da unidade.";
   const paint = () => {
     list.innerHTML = matches.length
       ? matches.map((p,i)=>`<li role="option" id="opt-${i}" aria-selected="${i===active}" data-i="${i}">${esc(p.nome)}${p.label!==p.nome?`<small>${esc(p.label.split(" · ")[1])}</small>`:""}</li>`).join("")
-      : `<li class="none">${PRODUTOS ? "Nenhuma unidade encontrada. Confira o nome." : "Carregando unidades…"}</li>`;
+      : `<li class="none">${msgVazia}</li>`;
     list.hidden = false; input.setAttribute("aria-expanded","true");
     if (active >= 0) input.setAttribute("aria-activedescendant", `opt-${active}`);
   };
   const search = async () => {
     const q = norm(input.value.trim());
-    if (q.length < 2){ close(); return; }
-    if (!PRODUTOS) { matches = []; paint(); await produtosPromise; }
+    if (q.length < 2){ matches = []; msgVazia = "Digite pelo menos 2 letras do nome do prédio ou da unidade."; paint(); return; }
+    if (!PRODUTOS) { matches = []; msgVazia = "Carregando unidades…"; paint(); await produtosPromise; }
+    if (produtosErro){ matches = []; msgVazia = "Não foi possível carregar a lista de unidades. Recarregue a página."; paint(); return; }
     const terms = q.split(/\s+/);
     matches = PRODUTOS.filter(p => terms.every(t => p.key.includes(t))).slice(0, 50);
+    msgVazia = "Nenhuma unidade encontrada. Confira o nome.";
     active = matches.length ? 0 : -1; paint();
   };
   input.addEventListener("input", () => {
@@ -328,6 +360,7 @@ function setupCombo(){
     else if (e.key==="Escape"){ close(); }
   });
   list.addEventListener("mousedown", e => { const li = e.target.closest("li[data-i]"); if (li){ e.preventDefault(); choose(matches[+li.dataset.i]); } });
+  input.addEventListener("focus", search);
   input.addEventListener("blur", () => setTimeout(close, 120));
 }
 
