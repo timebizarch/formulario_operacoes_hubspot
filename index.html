@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Solicitações Yuca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+  /* Yuca Design System (Claude Design · "Yuca Design System") — tokens de colors_and_type.css.
+     Layout: coluna única de formulário, cabeçalho editorial curto, escolha do tipo em cartões 2x2. */
+  :root{
+    color-scheme: light;
+    --mor-green:#12C68B; --mor-teal:#098C7B; --mor-deep:#005956; --inst-navy:#062840;
+    --fg1:var(--inst-navy); --fg2:#425158; --fg3:#8e9ba1;
+    --bg1:#ffffff; --bg2:#f4f5f6; --bg3:#f2fbf7;
+    --border:#dde1e3; --border-strong:#bbc3c7;
+    --accent:var(--mor-green); --accent-fg:var(--mor-deep);
+    --status-success:#13c081; --status-success-base:#f2fbf7;
+    --status-error:#d1436e; --status-error-base:#fdf4f4;
+    --sec-coral:#CE6363;
+    --font-display:'Fraunces','Times New Roman',Georgia,serif;
+    --font-body:'Montserrat',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --shadow-sm:0 1px 2px rgba(16,36,54,.06),0 1px 3px rgba(16,36,54,.08);
+    --shadow-md:0 4px 12px rgba(16,36,54,.08),0 2px 4px rgba(16,36,54,.06);
+    --ease:cubic-bezier(.4,0,.2,1);
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html{background:var(--bg2)}
+  body{margin:0;background:var(--bg2);color:var(--fg1);font:400 16px/1.55 var(--font-body);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:24px 64px}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+  .wordmark{font-family:var(--font-display);font-weight:900;font-size:28px;letter-spacing:-.02em;color:var(--fg1)}
+  .wordmark span{color:var(--accent)}
+  .brand small{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);border-left:1px solid var(--border-strong);padding-left:12px}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-fg);margin:0 0 8px}
+  h1{font-family:var(--font-display);font-weight:900;font-size:clamp(32px,6vw,44px);line-height:1.08;letter-spacing:-.01em;margin:0 0 12px;text-wrap:balance}
+  .lead{color:var(--fg2);margin:0 0 32px;max-width:56ch}
+  .types{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:24px}
+  @media (max-width:520px){.types{grid-template-columns:1fr}}
+  .type{display:flex;gap:14px;align-items:flex-start;text-align:left;cursor:pointer;font:inherit;color:var(--fg1);
+    background:var(--bg1);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--shadow-sm);
+    transition:box-shadow .2s var(--ease),border-color .2s var(--ease),background .2s var(--ease)}
+  .type:hover{box-shadow:var(--shadow-md)}
+  .type:active{transform:scale(.98);transition-duration:80ms}
+  .type[aria-pressed="true"]{border-color:var(--accent);background:var(--bg3);box-shadow:0 0 0 1px var(--accent) inset}
+  .type svg{flex:none;width:28px;height:28px;stroke:var(--accent-fg);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+  .type b{display:block;font-weight:700;font-size:16px}
+  .type span{display:block;font-size:14px;color:var(--fg2)}
+  .card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:32px}
+  @media (max-width:520px){.card{padding:24px 20px}}
+  .card h2{font-family:var(--font-display);font-weight:700;font-size:24px;line-height:1.25;margin:0 0 4px}
+  .card .sub{color:var(--fg2);font-size:14px;margin:0 0 24px}
+  .fields{display:grid;gap:16px}
+  .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  @media (max-width:560px){.row{grid-template-columns:1fr}}
+  .field{min-width:0}
+  label,.legend{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:var(--fg1)}
+  .opt{font-weight:400;color:var(--fg3)}
+  .hint{color:var(--fg3);font-size:13px;font-style:italic;margin-top:6px}
+  input[type=text],input[type=email],input[type=tel],input[type=url],input[type=date],input[type=time],select,textarea{
+    width:100%;padding:12px 14px;border:1px solid var(--border-strong);border-radius:var(--r-md);background:var(--bg1);color:var(--fg1);
+    font:500 15px/1.4 var(--font-body);transition:border-color .12s var(--ease),box-shadow .12s var(--ease)}
+  textarea{min-height:112px;resize:vertical}
+  ::placeholder{color:var(--fg3);font-style:italic}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(18,198,139,.22)}
+  .checks{display:flex;flex-wrap:wrap;gap:8px}
+  .checks label{display:inline-flex;align-items:center;gap:8px;font-weight:500;margin:0;cursor:pointer;
+    border:1px solid var(--border-strong);border-radius:var(--r-pill);padding:8px 14px;background:var(--bg1)}
+  .checks label:has(input:checked){border-color:var(--accent);background:var(--bg3)}
+  .checks input{accent-color:var(--mor-teal);margin:0}
+  .invalid input,.invalid select,.invalid textarea,.invalid .checks label{border-color:var(--status-error)}
+  .err{display:none;color:var(--status-error);font-size:13px;font-weight:500;margin-top:6px}
+  .invalid .err{display:block}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:24px;padding-top:24px;border-top:1px solid var(--border)}
+  .submit{border:0;border-radius:var(--r-md);padding:14px 28px;background:var(--accent);color:var(--fg1);font:700 16px var(--font-body);cursor:pointer;
+    transition:background .2s var(--ease)}
+  .submit:hover{background:#10b47e}
+  .submit:active{transform:scale(.96);transition-duration:80ms}
+  .submit:disabled{opacity:.6;cursor:progress}
+  .submit:focus-visible,.type:focus-visible{outline:3px solid var(--mor-teal);outline-offset:2px}
+  .note{font-size:13px;color:var(--fg3);margin:0}
+  .alert{border-radius:var(--r-md);padding:16px 18px;margin-top:20px;font-size:15px}
+  .alert.ok{background:var(--status-success-base);border:1px solid var(--status-success);color:var(--mor-deep)}
+  .alert.fail{background:var(--status-error-base);border:1px solid var(--status-error);color:#9b2450}
+  .alert strong{display:block;margin-bottom:2px}
+  .empty{display:flex;gap:14px;align-items:center;color:var(--fg2)}
+  .empty svg{width:32px;height:32px;stroke:var(--fg3);fill:none;stroke-width:1.5;flex:none}
+  footer{margin-top:32px;color:var(--fg3);font-size:13px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><div class="wordmark">yuca<span>.</span></div><small>Facilities e manutenção</small></div>
+
+  <p class="eyebrow">Central de solicitações</p>
+  <h1>Do que o imóvel precisa?</h1>
+  <p class="lead">Escolha o tipo de pedido e preencha os dados. Cada envio vira um chamado para a equipe responsável da Yuca.</p>
+
+  <div class="types" role="group" aria-label="Tipo de pedido">
+    <button type="button" class="type" data-tipo="manutencao" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>
+      <div><b>Manutenção</b><span>Vazamento, elétrica, fechadura, ar condicionado</span></div></button>
+    <button type="button" class="type" data-tipo="servico" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-6h6v6"/><path d="M3 21h18"/></svg>
+      <div><b>Serviços</b><span>Limpeza, internet, seguro, dedetização</span></div></button>
+    <button type="button" class="type" data-tipo="compras" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+      <div><b>Compras</b><span>Móveis, eletrodomésticos e utensílios</span></div></button>
+    <button type="button" class="type" data-tipo="chave" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3"/><path d="m16 7 3 3"/><path d="m18 5 2 2"/></svg>
+      <div><b>Pedido de chave</b><span>Retirada ou devolução de chaves</span></div></button>
+  </div>
+
+  <form class="card" id="form" novalidate>
+    <div class="empty" id="empty">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      <p style="margin:0">Selecione acima o tipo de pedido para ver os campos.</p>
+    </div>
+    <div id="head" hidden><h2 id="title"></h2><p class="sub">Campos sem a marcação “opcional” são obrigatórios.</p></div>
+    <div class="fields" id="fields"></div>
+    <div class="hp" aria-hidden="true"><label>Site <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+    <div class="actions" id="actions" hidden>
+      <button class="submit" type="submit" id="submit">Enviar solicitação</button>
+      <p class="note">Você recebe o número do chamado assim que enviar.</p>
+    </div>
+    <div class="alert" id="msg" role="status" aria-live="polite" hidden></div>
+  </form>
+
+  <footer>Yuca · Os dados enviados são usados apenas para atender esta solicitação.</footer>
+</div>
+
+<script>
+// ⚙️ Cole aqui a URL do webhook do cenário Make "Arthur [Facilities] Formulário externo -> HubSpot"
+const WEBHOOK_URL = "https://hook.us1.make.com/vxdbhnlciw3tvgelw1xi9mcq28vv5evl";
+
+// Valores = valores internos das propriedades no HubSpot (conferidos pela API)
+const CHAPTER_CHAVE = [["sales","Sales"],["community","Community"],["engenharia","Engenharia"],["facilities","Facilities"],["legal","Legal"],["finance","Finance"],["real_estate","Real Estate"],["obras_externo","Obras (externo)"]];
+const CHAPTER = [["cx","CX"],["dc","DC"],["people","People"],["finance","Finance"],["cs","CS"]];
+const CUSTO = [["proprietario","Proprietário"],["yuca","Yuca"],["yuker","Yuker"],["condominio","Condomínio"]];
+
+const FORMS = {
+  manutencao: { title:"Chamado de manutenção", fields:[
+    {row:[
+      {name:"nome_do_solicitante", label:"Seu nome", type:"text", required:true},
+      {name:"tipo_de_cliente", label:"Você é", type:"select", required:true, options:[["Inquilino","Inquilino"],["Proprietário","Proprietário"],["Investidor","Investidor"],["Terceiro","Terceiro (prestador, condomínio…)"]]}]},
+    {row:[
+      {name:"manut_email", label:"E-mail", type:"email", required:true},
+      {name:"manut_telefone", label:"Telefone", type:"tel", required:true, hint:"Com DDD"}]},
+    {name:"nome_da_unidade_nome_do_predio__unidade", label:"Prédio e unidade", type:"text", required:true, placeholder:"Ex.: Yuca Parque 91"},
+    {row:[
+      {name:"momento_da_manutencao", label:"Momento", type:"select", required:true, options:[["Durante locação","Durante a locação"],["Move-in","Na entrada (move-in)"],["Vistoria de Saída","Na vistoria de saída"]]},
+      {name:"tipo_de_chamado", label:"Tipo de problema", type:"select", required:true, options:[["Infiltração/Vazamento","Infiltração ou vazamento"],["Elétrica","Elétrica"],["Ar condicionado","Ar condicionado"],["Fechadura","Fechadura"],["Gás","Gás"],["Pintura","Pintura"],["Problema estrutural","Problema estrutural"],["Outros","Outro"]]}]},
+    {name:"descricao_do_problema", label:"Descreva o problema", type:"textarea", required:true, placeholder:"O que aconteceu, onde fica no imóvel e desde quando"},
+    {name:"hs_ticket_priority", label:"Urgência", type:"select", required:true, options:[["LOW","Baixa"],["MEDIUM","Média"],["HIGH","Alta"],["URGENT","Urgente (risco à segurança ou ao imóvel)"]]},
+    {name:"horarios_disponiveis_para_visita", label:"Horários disponíveis para visita", type:"textarea", required:false, placeholder:"Ex.: 14/10 das 9h às 12h; 15/10 à tarde"},
+    {name:"fotos_manutencao__drive_url", label:"Link das fotos ou vídeos", type:"url", required:false, hint:"Link de uma pasta do Google Drive, por exemplo"}
+  ]},
+  servico: { title:"Solicitação de serviço", fields:[
+    {row:[
+      {name:"unidade", label:"Unidade", type:"text", required:true},
+      {name:"chapter_solicitante", label:"Chapter solicitante", type:"select", required:true, options:CHAPTER}]},
+    {name:"quem_solicitou", label:"Quem solicitou?", type:"text", required:true},
+    {name:"qual_servico", label:"Qual serviço?", type:"select", required:true, options:[["limpeza_move_in","Limpeza move in"],["limpeza_move_out","Limpeza move out"],["limpeza_extra","Limpeza extra"],["limpeza_preventiva","Limpeza preventiva"],["limpeza_reativa_feedback_de_visitas","Limpeza reativa (feedback de visitas)"],["limpeza_recorrente","Limpeza recorrente"],["dedetizacao","Dedetização"],["higienizacao","Higienização"],["jardinagem","Jardinagem"],["internet","Internet"],["cancelamento_internet","Cancelamento de internet"],["congelamento_de_internet","Congelamento de internet"],["contratacao_de_seguro","Contratação de seguro"],["cancelamento_seguro","Cancelamento de seguro"],["compra","Compra"],["outro_servico","Outro serviço"]]},
+    {name:"compras_item", label:"O que comprar?", type:"textarea", required:false, hint:"Só se o serviço envolver compra de itens"},
+    {name:"motivo_solicitacao", label:"Qual o motivo da solicitação?", type:"text", required:false},
+    {name:"endereco_servico", label:"Endereço do serviço", type:"text", required:false},
+    {name:"de_quem_custo", label:"De quem é o custo?", type:"select", required:true, options:CUSTO},
+    {row:[
+      {name:"data_solicitada", label:"Data para o serviço", type:"date", required:true},
+      {name:"horario_solicitado", label:"Horário", type:"time", required:true}]},
+    {name:"adicionar_etiqueta", label:"Prioridade", type:"checks", required:true, options:[["Prioridade alta","Prioridade alta"],["Importante, não urgente","Importante, não urgente"],["Fluxo normal","Fluxo normal"],["Coliving","Coliving"],["Re-limpeza","Re-limpeza"]]},
+    {name:"outras_informacoes", label:"Outras informações relevantes", type:"textarea", required:false}
+  ]},
+  compras: { title:"Pedido de compra", fields:[
+    {row:[
+      {name:"unidade", label:"Unidade", type:"text", required:true},
+      {name:"chapter_solicitante", label:"Chapter solicitante", type:"select", required:true, options:CHAPTER}]},
+    {row:[
+      {name:"quem_solicitou", label:"Quem solicitou?", type:"text", required:true},
+      {name:"compras_email_solicitante", label:"E-mail do solicitante", type:"email", required:true}]},
+    {name:"compras_item", label:"O que comprar?", type:"textarea", required:true, placeholder:"Item, quantidade e, se tiver, o link do produto"},
+    {row:[
+      {name:"compras_categoria", label:"Categoria do item", type:"select", required:true, options:[["eletrodomestico","Eletrodoméstico"],["moveis","Móveis"],["eletroportatil","Eletroportátil"],["utensilios","Utensílios"]]},
+      {name:"de_quem_custo", label:"De quem é o custo?", type:"select", required:true, options:CUSTO}]},
+    {name:"compras_motivo", label:"Qual o motivo da solicitação?", type:"text", required:false},
+    {name:"compras_endereco", label:"Endereço da unidade", type:"text", required:true},
+    {name:"compras_etiqueta", label:"Prioridade", type:"checks", required:true, options:[["prioridade_alta","Prioridade alta"],["importante_nao_urgente","Importante, não urgente"],["fluxo_normal","Fluxo normal"]]},
+    {name:"outras_informacoes", label:"Outras informações relevantes", type:"textarea", required:false}
+  ]},
+  chave: { title:"Pedido de chave", fields:[
+    {name:"chave_status", label:"Status da chave", type:"checks", required:true, options:[["Chave já cadastrada","Chave já cadastrada"],["Nova chave","Nova chave"],["Chave perdida","Chave perdida"]]},
+    {name:"chave_imovel", label:"Nome do imóvel", type:"text", required:true, placeholder:"Ex.: Boreal Madalena 123A"},
+    {name:"chave_chapter", label:"Chapter do solicitante", type:"select", required:true, options:CHAPTER_CHAVE},
+    {row:[
+      {name:"chave_solicitante", label:"Nome do solicitante", type:"text", required:true},
+      {name:"chave_telefone", label:"Telefone do solicitante", type:"tel", required:false, hint:"Com DDD"}]},
+    {name:"chave_data_evento", label:"Data da retirada ou devolução", type:"date", required:true},
+    {name:"chave_dono_info", label:"Quem vai retirar e devolver a chave", type:"textarea", required:true, placeholder:"Nome de quem retira, quem devolve e onde deixar a chave"}
+  ]}
+};
+
+const $ = s => document.querySelector(s);
+let tipo = null;
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function fieldHTML(f){
+  const opt = f.required ? "" : ' <span class="opt">(opcional)</span>';
+  const hint = f.hint ? `<div class="hint">${esc(f.hint)}</div>` : "";
+  const err = `<div class="err">${f.type==="checks"?"Selecione ao menos uma opção.":f.type==="email"?"Informe um e-mail válido.":f.type==="url"?"Informe um link começando com https://":"Preencha este campo."}</div>`;
+  const ph = f.placeholder ? ` placeholder="${esc(f.placeholder)}"` : "";
+  if (f.type==="checks"){
+    return `<div class="field" data-field="${f.name}" data-required="${f.required}" data-type="checks"><span class="legend">${esc(f.label)}${opt}</span>
+      <div class="checks">${f.options.map(([v,l])=>`<label><input type="checkbox" name="${f.name}" value="${esc(v)}">${esc(l)}</label>`).join("")}</div>${hint}${err}</div>`;
+  }
+  let input;
+  if (f.type==="select") input = `<select id="f_${f.name}" name="${f.name}"><option value="">Selecione</option>${f.options.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join("")}</select>`;
+  else if (f.type==="textarea") input = `<textarea id="f_${f.name}" name="${f.name}" maxlength="5000"${ph}></textarea>`;
+  else input = `<input id="f_${f.name}" name="${f.name}" type="${f.type}" maxlength="500"${ph}${f.type==="tel"?' inputmode="tel" autocomplete="tel"':""}${f.type==="email"?' autocomplete="email"':""}>`;
+  return `<div class="field" data-field="${f.name}" data-required="${f.required}" data-type="${f.type}"><label for="f_${f.name}">${esc(f.label)}${opt}</label>${input}${hint}${err}</div>`;
+}
+
+function render(t){
+  tipo = t;
+  document.querySelectorAll(".type").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.tipo===t)));
+  const cfg = FORMS[t];
+  $("#title").textContent = cfg.title;
+  $("#fields").innerHTML = cfg.fields.map(f => f.row ? `<div class="row">${f.row.map(fieldHTML).join("")}</div>` : fieldHTML(f)).join("");
+  $("#empty").hidden = true; $("#head").hidden = false; $("#actions").hidden = false; $("#msg").hidden = true;
+  $("#form").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
+}
+
+function collect(){
+  const data = {}; let first = null;
+  document.querySelectorAll("#fields .field").forEach(el=>{
+    const name = el.dataset.field, type = el.dataset.type;
+    const v = type==="checks"
+      ? [...el.querySelectorAll("input:checked")].map(i=>i.value).join(";")
+      : el.querySelector("input,select,textarea").value.trim();
+    let bad = el.dataset.required==="true" && !v;
+    if (!bad && v && type==="email") bad = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    if (!bad && v && type==="url") bad = !/^https?:\/\/\S+$/i.test(v);
+    el.classList.toggle("invalid", bad);
+    if (bad) first = first || el;
+    if (v) data[name] = v;
+  });
+  if (first){ first.scrollIntoView({block:"center"}); const i=first.querySelector("input,select,textarea"); if(i) i.focus({preventScroll:true}); return null; }
+  return data;
+}
+
+function showMsg(kind, title, text){
+  const m = $("#msg"); m.className = "alert " + kind; m.hidden = false;
+  m.innerHTML = `<strong>${esc(title)}</strong>${esc(text)}`;
+}
+
+document.querySelectorAll(".type").forEach(b=>b.addEventListener("click",()=>render(b.dataset.tipo)));
+$("#fields").addEventListener("input", e=>{ const f=e.target.closest(".field"); if(f) f.classList.remove("invalid"); });
+
+$("#form").addEventListener("submit", async e=>{
+  e.preventDefault();
+  if (!tipo) return;
+  const data = collect(); if (!data) return;
+  const body = new URLSearchParams({tipo, website: e.target.website.value, ...data});
+  const btn = $("#submit");
+  btn.disabled = true; btn.textContent = "Enviando…"; $("#msg").hidden = true;
+  try{
+    // form-urlencoded é uma requisição "simples": o navegador não faz preflight de CORS
+    const r = await fetch(WEBHOOK_URL, {method:"POST", body});
+    let res = {}; try{ res = await r.json(); }catch(_){}
+    if (!r.ok || !res.ok) throw new Error(res.erro || "Não foi possível registrar o pedido.");
+    $("#fields").innerHTML = ""; $("#head").hidden = true; $("#actions").hidden = true; $("#empty").hidden = false;
+    document.querySelectorAll(".type").forEach(b=>b.setAttribute("aria-pressed","false")); tipo = null;
+    showMsg("ok", `Pedido enviado. Chamado nº ${res.ticket}.`, " A equipe da Yuca vai dar sequência e entrar em contato se precisar de mais informações.");
+  }catch(err){
+    showMsg("fail", err.message, " Confira sua conexão e tente de novo. Se continuar, fale com a equipe de Facilities da Yuca.");
+  }finally{
+    btn.disabled = false; btn.textContent = "Enviar solicitação";
+  }
+});
+</script>
+</body>
+</html>
