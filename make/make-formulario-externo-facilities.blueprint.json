@@ -1,0 +1,671 @@
+{
+ "name": "Arthur [Facilities] Formulário externo -> HubSpot (Chaves, Compras, Serviços, Manutenção)",
+ "flow": [
+  {
+   "id": 1,
+   "module": "gateway:CustomWebHook",
+   "version": 1,
+   "parameters": {
+    "maxResults": 1
+   },
+   "mapper": {},
+   "metadata": {
+    "designer": {
+     "x": 0,
+     "y": 0
+    }
+   }
+  },
+  {
+   "id": 2,
+   "module": "builtin:BasicRouter",
+   "version": 1,
+   "mapper": null,
+   "metadata": {
+    "designer": {
+     "x": 300,
+     "y": 0
+    }
+   },
+   "routes": [
+    {
+     "flow": [
+      {
+       "id": 10,
+       "module": "hubspotcrm:CreateTicket",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "_method": "all",
+        "parseCustomFields": true,
+        "hs_pipeline": "922963637",
+        "hs_pipeline_stage": "1409823122",
+        "subject": "{{1.produto_nome}}",
+        "chave_status": "{{1.chave_status}}",
+        "chave_imovel": "{{1.produto_nome}}",
+        "chave_chapter": "{{1.chave_chapter}}",
+        "chave_solicitante": "{{1.chave_solicitante}}",
+        "chave_telefone": "{{1.chave_telefone}}",
+        "chave_data_evento": "{{1.chave_data_evento}}",
+        "chave_dono_info": "{{1.chave_dono_info}}",
+        "content": "Pedido criado pelo formulário externo de Facilities em {{formatDate(now; \"DD/MM/YYYY HH:mm\"; \"America/Sao_Paulo\")}}.",
+        "auto_id_do_produto": "{{1.produto_admin_id}}"
+       },
+       "metadata": {
+        "designer": {
+         "x": 600,
+         "y": -300
+        }
+       },
+       "filter": {
+        "name": "Pedido de chave completo",
+        "conditions": [
+         [
+          {
+           "a": "{{1.tipo}}",
+           "b": "chave",
+           "o": "text:equal"
+          },
+          {
+           "a": "{{1.website}}",
+           "o": "notexist"
+          },
+          {
+           "a": "{{1.chave_status}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.chave_chapter}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.chave_solicitante}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.chave_data_evento}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.chave_dono_info}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.produto_id}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.produto_nome}}",
+           "o": "exist"
+          }
+         ]
+        ]
+       }
+      },
+      {
+       "id": 15,
+       "module": "hubspotcrm:CreateAssociation",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "toObjectId": "{{1.produto_id}}",
+        "definitionId": "custom",
+        "fromObjectId": "{{10.id}}",
+        "toObjectType": "2-59303198",
+        "fromObjectType": "tickets",
+        "associationTypeId": 200,
+        "associationCategory": "USER_DEFINED"
+       },
+       "metadata": {
+        "designer": {
+         "x": 900,
+         "y": -300
+        }
+       }
+      },
+      {
+       "id": 11,
+       "module": "gateway:WebhookRespond",
+       "version": 1,
+       "parameters": {},
+       "mapper": {
+        "status": "200",
+        "body": "{\"ok\": true, \"ticket\": \"{{10.id}}\"}",
+        "headers": [
+         {
+          "key": "Content-Type",
+          "value": "application/json"
+         },
+         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+         }
+        ]
+       },
+       "metadata": {
+        "designer": {
+         "x": 1200,
+         "y": -300
+        }
+       }
+      }
+     ]
+    },
+    {
+     "flow": [
+      {
+       "id": 20,
+       "module": "hubspotcrm:CreateTicket",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "_method": "all",
+        "parseCustomFields": true,
+        "hs_pipeline": "922963636",
+        "hs_pipeline_stage": "1409823116",
+        "subject": "{{1.produto_nome}}",
+        "unidade": "{{1.produto_nome}}",
+        "chapter_solicitante": "{{1.chapter_solicitante}}",
+        "quem_solicitou": "{{1.quem_solicitou}}",
+        "compras_email_solicitante": "{{1.compras_email_solicitante}}",
+        "compras_item": "{{1.compras_item}}",
+        "compras_categoria": "{{1.compras_categoria}}",
+        "compras_motivo": "{{1.compras_motivo}}",
+        "compras_endereco": "{{1.compras_endereco}}",
+        "de_quem_custo": "{{1.de_quem_custo}}",
+        "compras_etiqueta": "{{1.compras_etiqueta}}",
+        "outras_informacoes": "{{1.outras_informacoes}}",
+        "content": "Pedido criado pelo formulário externo de Facilities em {{formatDate(now; \"DD/MM/YYYY HH:mm\"; \"America/Sao_Paulo\")}}.",
+        "auto_id_do_produto": "{{1.produto_admin_id}}"
+       },
+       "metadata": {
+        "designer": {
+         "x": 600,
+         "y": -100
+        }
+       },
+       "filter": {
+        "name": "Compras completo",
+        "conditions": [
+         [
+          {
+           "a": "{{1.tipo}}",
+           "b": "compras",
+           "o": "text:equal"
+          },
+          {
+           "a": "{{1.website}}",
+           "o": "notexist"
+          },
+          {
+           "a": "{{1.chapter_solicitante}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.quem_solicitou}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.compras_email_solicitante}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.compras_item}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.compras_categoria}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.compras_endereco}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.de_quem_custo}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.compras_etiqueta}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.produto_id}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.produto_nome}}",
+           "o": "exist"
+          }
+         ]
+        ]
+       }
+      },
+      {
+       "id": 25,
+       "module": "hubspotcrm:CreateAssociation",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "toObjectId": "{{1.produto_id}}",
+        "definitionId": "custom",
+        "fromObjectId": "{{20.id}}",
+        "toObjectType": "2-59303198",
+        "fromObjectType": "tickets",
+        "associationTypeId": 200,
+        "associationCategory": "USER_DEFINED"
+       },
+       "metadata": {
+        "designer": {
+         "x": 900,
+         "y": -100
+        }
+       }
+      },
+      {
+       "id": 21,
+       "module": "gateway:WebhookRespond",
+       "version": 1,
+       "parameters": {},
+       "mapper": {
+        "status": "200",
+        "body": "{\"ok\": true, \"ticket\": \"{{20.id}}\"}",
+        "headers": [
+         {
+          "key": "Content-Type",
+          "value": "application/json"
+         },
+         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+         }
+        ]
+       },
+       "metadata": {
+        "designer": {
+         "x": 1200,
+         "y": -100
+        }
+       }
+      }
+     ]
+    },
+    {
+     "flow": [
+      {
+       "id": 30,
+       "module": "hubspotcrm:CreateTicket",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "_method": "all",
+        "parseCustomFields": true,
+        "hs_pipeline": "916347175",
+        "hs_pipeline_stage": "1394953739",
+        "subject": "{{1.produto_nome}}",
+        "unidade": "{{1.produto_nome}}",
+        "chapter_solicitante": "{{1.chapter_solicitante}}",
+        "quem_solicitou": "{{1.quem_solicitou}}",
+        "qual_servico": "{{1.qual_servico}}",
+        "compras_item": "{{1.compras_item}}",
+        "motivo_solicitacao": "{{1.motivo_solicitacao}}",
+        "endereco_servico": "{{1.endereco_servico}}",
+        "de_quem_custo": "{{1.de_quem_custo}}",
+        "data_solicitada": "{{1.data_solicitada}}",
+        "adicionar_etiqueta": "{{1.adicionar_etiqueta}}",
+        "outras_informacoes": "{{1.outras_informacoes}}",
+        "content": "Pedido criado pelo formulário externo de Facilities em {{formatDate(now; \"DD/MM/YYYY HH:mm\"; \"America/Sao_Paulo\")}}.\nHorário desejado para o serviço: {{1.horario_solicitado}}",
+        "auto_id_do_produto": "{{1.produto_admin_id}}"
+       },
+       "metadata": {
+        "designer": {
+         "x": 600,
+         "y": 100
+        }
+       },
+       "filter": {
+        "name": "Serviço completo",
+        "conditions": [
+         [
+          {
+           "a": "{{1.tipo}}",
+           "b": "servico",
+           "o": "text:equal"
+          },
+          {
+           "a": "{{1.website}}",
+           "o": "notexist"
+          },
+          {
+           "a": "{{1.chapter_solicitante}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.quem_solicitou}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.qual_servico}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.de_quem_custo}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.data_solicitada}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.horario_solicitado}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.adicionar_etiqueta}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.produto_id}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.produto_nome}}",
+           "o": "exist"
+          }
+         ]
+        ]
+       }
+      },
+      {
+       "id": 35,
+       "module": "hubspotcrm:CreateAssociation",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "toObjectId": "{{1.produto_id}}",
+        "definitionId": "custom",
+        "fromObjectId": "{{30.id}}",
+        "toObjectType": "2-59303198",
+        "fromObjectType": "tickets",
+        "associationTypeId": 200,
+        "associationCategory": "USER_DEFINED"
+       },
+       "metadata": {
+        "designer": {
+         "x": 900,
+         "y": 100
+        }
+       }
+      },
+      {
+       "id": 31,
+       "module": "gateway:WebhookRespond",
+       "version": 1,
+       "parameters": {},
+       "mapper": {
+        "status": "200",
+        "body": "{\"ok\": true, \"ticket\": \"{{30.id}}\"}",
+        "headers": [
+         {
+          "key": "Content-Type",
+          "value": "application/json"
+         },
+         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+         }
+        ]
+       },
+       "metadata": {
+        "designer": {
+         "x": 1200,
+         "y": 100
+        }
+       }
+      }
+     ]
+    },
+    {
+     "flow": [
+      {
+       "id": 50,
+       "module": "hubspotcrm:CreateTicket",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "_method": "all",
+        "parseCustomFields": true,
+        "hs_pipeline": "888510978",
+        "hs_pipeline_stage": "1337894756",
+        "source_type": "FORM",
+        "departamento_em_n2": "Engenharia",
+        "subject": "{{1.nome_do_solicitante}} - {{1.produto_nome}}",
+        "nome_do_solicitante": "{{1.nome_do_solicitante}}",
+        "tipo_de_cliente": "{{1.tipo_de_cliente}}",
+        "nome_da_unidade_nome_do_predio__unidade": "{{1.produto_nome}}",
+        "momento_da_manutencao": "{{1.momento_da_manutencao}}",
+        "tipo_de_chamado": "{{1.tipo_de_chamado}}",
+        "descricao_do_problema": "{{1.descricao_do_problema}}",
+        "hs_ticket_priority": "{{1.hs_ticket_priority}}",
+        "horarios_disponiveis_para_visita": "{{1.horarios_disponiveis_para_visita}}",
+        "fotos_manutencao__drive_url": "{{1.fotos_manutencao__drive_url}}",
+        "unidade": "{{1.produto_nome}}",
+        "content": "Chamado aberto pelo formulário externo em {{formatDate(now; \"DD/MM/YYYY HH:mm\"; \"America/Sao_Paulo\")}}.\nContato do solicitante: {{1.manut_email}} · {{1.manut_telefone}}",
+        "auto_id_do_produto": "{{1.produto_admin_id}}"
+       },
+       "metadata": {
+        "designer": {
+         "x": 600,
+         "y": 300
+        }
+       },
+       "filter": {
+        "name": "Manutenção completo",
+        "conditions": [
+         [
+          {
+           "a": "{{1.tipo}}",
+           "b": "manutencao",
+           "o": "text:equal"
+          },
+          {
+           "a": "{{1.website}}",
+           "o": "notexist"
+          },
+          {
+           "a": "{{1.nome_do_solicitante}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.tipo_de_cliente}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.manut_email}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.manut_telefone}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.momento_da_manutencao}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.tipo_de_chamado}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.descricao_do_problema}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.hs_ticket_priority}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.produto_id}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.produto_nome}}",
+           "o": "exist"
+          }
+         ]
+        ]
+       }
+      },
+      {
+       "id": 55,
+       "module": "hubspotcrm:CreateAssociation",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "toObjectId": "{{1.produto_id}}",
+        "definitionId": "custom",
+        "fromObjectId": "{{50.id}}",
+        "toObjectType": "2-59303198",
+        "fromObjectType": "tickets",
+        "associationTypeId": 200,
+        "associationCategory": "USER_DEFINED"
+       },
+       "metadata": {
+        "designer": {
+         "x": 900,
+         "y": 300
+        }
+       }
+      },
+      {
+       "id": 51,
+       "module": "gateway:WebhookRespond",
+       "version": 1,
+       "parameters": {},
+       "mapper": {
+        "status": "200",
+        "body": "{\"ok\": true, \"ticket\": \"{{50.id}}\"}",
+        "headers": [
+         {
+          "key": "Content-Type",
+          "value": "application/json"
+         },
+         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+         }
+        ]
+       },
+       "metadata": {
+        "designer": {
+         "x": 1200,
+         "y": 300
+        }
+       }
+      }
+     ]
+    },
+    {
+     "flow": [
+      {
+       "id": 40,
+       "module": "gateway:WebhookRespond",
+       "version": 1,
+       "parameters": {},
+       "mapper": {
+        "status": "400",
+        "body": "{\"ok\": false, \"erro\": \"Pedido inválido ou incompleto.\"}",
+        "headers": [
+         {
+          "key": "Content-Type",
+          "value": "application/json"
+         },
+         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+         }
+        ]
+       },
+       "metadata": {
+        "designer": {
+         "x": 600,
+         "y": 450
+        }
+       },
+       "filter": {
+        "name": "Inválido (spam ou tipo desconhecido)",
+        "conditions": [
+         [
+          {
+           "a": "{{1.website}}",
+           "o": "exist"
+          }
+         ],
+         [
+          {
+           "a": "{{1.tipo}}",
+           "b": "chave",
+           "o": "text:notequal"
+          },
+          {
+           "a": "{{1.tipo}}",
+           "b": "compras",
+           "o": "text:notequal"
+          },
+          {
+           "a": "{{1.tipo}}",
+           "b": "servico",
+           "o": "text:notequal"
+          },
+          {
+           "a": "{{1.tipo}}",
+           "b": "manutencao",
+           "o": "text:notequal"
+          }
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "metadata": {
+  "instant": true,
+  "version": 1,
+  "scenario": {
+   "roundtrips": 1,
+   "maxErrors": 3,
+   "autoCommit": true,
+   "autoCommitTriggerLast": true,
+   "sequential": false,
+   "slots": null,
+   "confidential": false,
+   "dataloss": false,
+   "dlq": false,
+   "freshVariables": false
+  },
+  "designer": {
+   "orphans": []
+  },
+  "zone": "us1.make.com",
+  "notes": []
+ }
+}

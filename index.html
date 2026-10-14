@@ -76,6 +76,17 @@
   .err{display:none;color:var(--status-error);font-size:13px;font-weight:500;margin-top:6px}
   .invalid .err{display:block}
   .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  /* seletor de unidade (Produtos do HubSpot) */
+  .combo{position:relative}
+  .combo-list{position:absolute;z-index:5;left:0;right:0;top:calc(100% + 4px);max-height:280px;overflow-y:auto;margin:0;padding:6px;list-style:none;
+    background:var(--bg1);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-md)}
+  .combo-list li{padding:10px 12px;border-radius:var(--r-sm);cursor:pointer;font-size:15px}
+  .combo-list li small{color:var(--fg3);margin-left:6px}
+  .combo-list li[aria-selected="true"],.combo-list li:hover{background:var(--bg3)}
+  .combo-list .none{color:var(--fg3);cursor:default;font-style:italic}
+  .combo-list .none:hover{background:none}
+  .picked{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--mor-deep);font-weight:600}
+  .picked::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
   .actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:24px;padding-top:24px;border-top:1px solid var(--border)}
   .submit{border:0;border-radius:var(--r-md);padding:14px 28px;background:var(--accent);color:var(--fg1);font:700 16px var(--font-body);cursor:pointer;
     transition:background .2s var(--ease)}
@@ -143,16 +154,18 @@ const WEBHOOK_URL = "https://hook.us1.make.com/vxdbhnlciw3tvgelw1xi9mcq28vv5evl"
 const CHAPTER_CHAVE = [["sales","Sales"],["community","Community"],["engenharia","Engenharia"],["facilities","Facilities"],["legal","Legal"],["finance","Finance"],["real_estate","Real Estate"],["obras_externo","Obras (externo)"]];
 const CHAPTER = [["cx","CX"],["dc","DC"],["people","People"],["finance","Finance"],["cs","CS"]];
 const CUSTO = [["proprietario","Proprietário"],["yuca","Yuca"],["yuker","Yuker"],["condominio","Condomínio"]];
+// Unidade = Produto do HubSpot (lista em products.json, atualizada todo dia pela GitHub Action)
+const UNIDADE = {name:"produto", label:"Unidade", type:"produto", required:true, placeholder:"Digite o nome do prédio ou da unidade"};
 
 const FORMS = {
   manutencao: { title:"Chamado de manutenção", fields:[
     {row:[
       {name:"nome_do_solicitante", label:"Seu nome", type:"text", required:true},
-      {name:"tipo_de_cliente", label:"Você é", type:"select", required:true, options:[["Inquilino","Inquilino"],["Proprietário","Proprietário"],["Investidor","Investidor"],["Terceiro","Terceiro (prestador, condomínio…)"]]}]},
+      {name:"tipo_de_cliente", label:"Quem pediu?", type:"select", required:true, options:[["Inquilino","Inquilino"],["Proprietário","Proprietário"],["Investidor","Investidor"],["Terceiro","Terceiro (prestador, condomínio…)"]]}]},
     {row:[
       {name:"manut_email", label:"E-mail", type:"email", required:true},
       {name:"manut_telefone", label:"Telefone", type:"tel", required:true, hint:"Com DDD"}]},
-    {name:"nome_da_unidade_nome_do_predio__unidade", label:"Prédio e unidade", type:"text", required:true, placeholder:"Ex.: Yuca Parque 91"},
+    UNIDADE,
     {row:[
       {name:"momento_da_manutencao", label:"Momento", type:"select", required:true, options:[["Durante locação","Durante a locação"],["Move-in","Na entrada (move-in)"],["Vistoria de Saída","Na vistoria de saída"]]},
       {name:"tipo_de_chamado", label:"Tipo de problema", type:"select", required:true, options:[["Infiltração/Vazamento","Infiltração ou vazamento"],["Elétrica","Elétrica"],["Ar condicionado","Ar condicionado"],["Fechadura","Fechadura"],["Gás","Gás"],["Pintura","Pintura"],["Problema estrutural","Problema estrutural"],["Outros","Outro"]]}]},
@@ -162,10 +175,10 @@ const FORMS = {
     {name:"fotos_manutencao__drive_url", label:"Link das fotos ou vídeos", type:"url", required:false, hint:"Link de uma pasta do Google Drive, por exemplo"}
   ]},
   servico: { title:"Solicitação de serviço", fields:[
+    UNIDADE,
     {row:[
-      {name:"unidade", label:"Unidade", type:"text", required:true},
+      {name:"quem_solicitou", label:"Quem solicitou?", type:"text", required:true},
       {name:"chapter_solicitante", label:"Chapter solicitante", type:"select", required:true, options:CHAPTER}]},
-    {name:"quem_solicitou", label:"Quem solicitou?", type:"text", required:true},
     {name:"qual_servico", label:"Qual serviço?", type:"select", required:true, options:[["limpeza_move_in","Limpeza move in"],["limpeza_move_out","Limpeza move out"],["limpeza_extra","Limpeza extra"],["limpeza_preventiva","Limpeza preventiva"],["limpeza_reativa_feedback_de_visitas","Limpeza reativa (feedback de visitas)"],["limpeza_recorrente","Limpeza recorrente"],["dedetizacao","Dedetização"],["higienizacao","Higienização"],["jardinagem","Jardinagem"],["internet","Internet"],["cancelamento_internet","Cancelamento de internet"],["congelamento_de_internet","Congelamento de internet"],["contratacao_de_seguro","Contratação de seguro"],["cancelamento_seguro","Cancelamento de seguro"],["compra","Compra"],["outro_servico","Outro serviço"]]},
     {name:"compras_item", label:"O que comprar?", type:"textarea", required:false, hint:"Só se o serviço envolver compra de itens"},
     {name:"motivo_solicitacao", label:"Qual o motivo da solicitação?", type:"text", required:false},
@@ -178,12 +191,11 @@ const FORMS = {
     {name:"outras_informacoes", label:"Outras informações relevantes", type:"textarea", required:false}
   ]},
   compras: { title:"Pedido de compra", fields:[
-    {row:[
-      {name:"unidade", label:"Unidade", type:"text", required:true},
-      {name:"chapter_solicitante", label:"Chapter solicitante", type:"select", required:true, options:CHAPTER}]},
+    UNIDADE,
     {row:[
       {name:"quem_solicitou", label:"Quem solicitou?", type:"text", required:true},
-      {name:"compras_email_solicitante", label:"E-mail do solicitante", type:"email", required:true}]},
+      {name:"chapter_solicitante", label:"Chapter solicitante", type:"select", required:true, options:CHAPTER}]},
+    {name:"compras_email_solicitante", label:"E-mail do solicitante", type:"email", required:true},
     {name:"compras_item", label:"O que comprar?", type:"textarea", required:true, placeholder:"Item, quantidade e, se tiver, o link do produto"},
     {row:[
       {name:"compras_categoria", label:"Categoria do item", type:"select", required:true, options:[["eletrodomestico","Eletrodoméstico"],["moveis","Móveis"],["eletroportatil","Eletroportátil"],["utensilios","Utensílios"]]},
@@ -195,7 +207,7 @@ const FORMS = {
   ]},
   chave: { title:"Pedido de chave", fields:[
     {name:"chave_status", label:"Status da chave", type:"checks", required:true, options:[["Chave já cadastrada","Chave já cadastrada"],["Nova chave","Nova chave"],["Chave perdida","Chave perdida"]]},
-    {name:"chave_imovel", label:"Nome do imóvel", type:"text", required:true, placeholder:"Ex.: Boreal Madalena 123A"},
+    UNIDADE,
     {name:"chave_chapter", label:"Chapter do solicitante", type:"select", required:true, options:CHAPTER_CHAVE},
     {row:[
       {name:"chave_solicitante", label:"Nome do solicitante", type:"text", required:true},
@@ -214,6 +226,14 @@ function fieldHTML(f){
   const hint = f.hint ? `<div class="hint">${esc(f.hint)}</div>` : "";
   const err = `<div class="err">${f.type==="checks"?"Selecione ao menos uma opção.":f.type==="email"?"Informe um e-mail válido.":f.type==="url"?"Informe um link começando com https://":"Preencha este campo."}</div>`;
   const ph = f.placeholder ? ` placeholder="${esc(f.placeholder)}"` : "";
+  if (f.type==="produto"){
+    return `<div class="field combo" data-field="produto" data-required="${f.required}" data-type="produto">
+      <label for="f_produto">${esc(f.label)}${opt}</label>
+      <input id="f_produto" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="produto-list"${ph}>
+      <ul class="combo-list" id="produto-list" role="listbox" hidden></ul>
+      <div class="picked" id="produto-picked" hidden></div>
+      <div class="err">Escolha a unidade na lista.</div></div>`;
+  }
   if (f.type==="checks"){
     return `<div class="field" data-field="${f.name}" data-required="${f.required}" data-type="checks"><span class="legend">${esc(f.label)}${opt}</span>
       <div class="checks">${f.options.map(([v,l])=>`<label><input type="checkbox" name="${f.name}" value="${esc(v)}">${esc(l)}</label>`).join("")}</div>${hint}${err}</div>`;
@@ -232,6 +252,7 @@ function render(t){
   $("#title").textContent = cfg.title;
   $("#fields").innerHTML = cfg.fields.map(f => f.row ? `<div class="row">${f.row.map(fieldHTML).join("")}</div>` : fieldHTML(f)).join("");
   $("#empty").hidden = true; $("#head").hidden = false; $("#actions").hidden = false; $("#msg").hidden = true;
+  produtoEscolhido = null; setupCombo();
   $("#form").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
 }
 
@@ -239,6 +260,13 @@ function collect(){
   const data = {}; let first = null;
   document.querySelectorAll("#fields .field").forEach(el=>{
     const name = el.dataset.field, type = el.dataset.type;
+    if (type==="produto"){
+      const ok = !!produtoEscolhido && $("#f_produto").value === produtoEscolhido.label;
+      el.classList.toggle("invalid", !ok);
+      if (!ok) first = first || el;
+      else { data.produto_id = produtoEscolhido.id; data.produto_nome = produtoEscolhido.nome; data.produto_admin_id = produtoEscolhido.adminId; }
+      return;
+    }
     const v = type==="checks"
       ? [...el.querySelectorAll("input:checked")].map(i=>i.value).join(";")
       : el.querySelector("input,select,textarea").value.trim();
@@ -251,6 +279,56 @@ function collect(){
   });
   if (first){ first.scrollIntoView({block:"center"}); const i=first.querySelector("input,select,textarea"); if(i) i.focus({preventScroll:true}); return null; }
   return data;
+}
+
+// ---------- Seletor de unidade ----------
+let PRODUTOS = null, produtoEscolhido = null;
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const produtosPromise = fetch("products.json", {cache:"no-cache"}).then(r=>r.json()).then(rows=>{
+  const count = {};
+  rows.forEach(r => { const k = norm(r[1]); count[k] = (count[k]||0) + 1; });
+  // nomes repetidos ganham um código curto para diferenciar
+  PRODUTOS = rows.map(([id,nome,adminId]) => ({id, nome, adminId, key:norm(nome),
+    label: count[norm(nome)] > 1 ? `${nome} · ${adminId.slice(0,4)}` : nome}));
+}).catch(()=>{ PRODUTOS = []; });
+
+function setupCombo(){
+  const input = $("#f_produto"); if (!input) return;
+  const list = $("#produto-list"), picked = $("#produto-picked"), field = input.closest(".field");
+  let matches = [], active = -1;
+  const close = () => { list.hidden = true; input.setAttribute("aria-expanded","false"); active = -1; };
+  const choose = p => {
+    produtoEscolhido = p; input.value = p.label; close();
+    picked.textContent = `Unidade selecionada: ${p.nome}`; picked.hidden = false; field.classList.remove("invalid");
+  };
+  const paint = () => {
+    list.innerHTML = matches.length
+      ? matches.map((p,i)=>`<li role="option" id="opt-${i}" aria-selected="${i===active}" data-i="${i}">${esc(p.nome)}${p.label!==p.nome?`<small>${esc(p.label.split(" · ")[1])}</small>`:""}</li>`).join("")
+      : `<li class="none">${PRODUTOS ? "Nenhuma unidade encontrada. Confira o nome." : "Carregando unidades…"}</li>`;
+    list.hidden = false; input.setAttribute("aria-expanded","true");
+    if (active >= 0) input.setAttribute("aria-activedescendant", `opt-${active}`);
+  };
+  const search = async () => {
+    const q = norm(input.value.trim());
+    if (q.length < 2){ close(); return; }
+    if (!PRODUTOS) { matches = []; paint(); await produtosPromise; }
+    const terms = q.split(/\s+/);
+    matches = PRODUTOS.filter(p => terms.every(t => p.key.includes(t))).slice(0, 50);
+    active = matches.length ? 0 : -1; paint();
+  };
+  input.addEventListener("input", () => {
+    if (produtoEscolhido && input.value !== produtoEscolhido.label){ produtoEscolhido = null; picked.hidden = true; }
+    search();
+  });
+  input.addEventListener("keydown", e => {
+    if (list.hidden || !matches.length) return;
+    if (e.key==="ArrowDown"){ e.preventDefault(); active = (active+1) % matches.length; paint(); }
+    else if (e.key==="ArrowUp"){ e.preventDefault(); active = (active-1+matches.length) % matches.length; paint(); }
+    else if (e.key==="Enter"){ e.preventDefault(); if (active>=0) choose(matches[active]); }
+    else if (e.key==="Escape"){ close(); }
+  });
+  list.addEventListener("mousedown", e => { const li = e.target.closest("li[data-i]"); if (li){ e.preventDefault(); choose(matches[+li.dataset.i]); } });
+  input.addEventListener("blur", () => setTimeout(close, 120));
 }
 
 function showMsg(kind, title, text){
