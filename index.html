@@ -382,11 +382,14 @@ $("#form").addEventListener("submit", async e=>{
   try{
     // form-urlencoded é uma requisição "simples": o navegador não faz preflight de CORS
     const r = await fetch(WEBHOOK_URL, {method:"POST", body});
-    let res = {}; try{ res = await r.json(); }catch(_){}
-    if (!r.ok || !res.ok) throw new Error(res.erro || "Não foi possível registrar o pedido.");
+    const texto = await r.text(); let res = {}; try{ res = JSON.parse(texto); }catch(_){}
+    // "Accepted" = o Make recebeu o pedido, mas ainda vai processar (fila). Não é erro: não pedir para reenviar.
+    const naFila = r.ok && !res.ok && /accepted/i.test(texto);
+    if (!naFila && (!r.ok || !res.ok)) throw new Error(res.erro || "Não foi possível registrar o pedido.");
     $("#fields").innerHTML = ""; $("#head").hidden = true; $("#actions").hidden = true; $("#empty").hidden = false;
     document.querySelectorAll(".type").forEach(b=>b.setAttribute("aria-pressed","false")); tipo = null;
-    showMsg("ok", `Pedido enviado. Chamado nº ${res.ticket}.`, " A equipe da Yuca vai dar sequência e entrar em contato se precisar de mais informações.");
+    if (naFila) showMsg("ok", "Pedido recebido.", " Ele vai virar um chamado em alguns minutos. Não precisa enviar de novo.");
+    else showMsg("ok", `Pedido enviado. Chamado nº ${res.ticket}.`, " A equipe da Yuca vai dar sequência e entrar em contato se precisar de mais informações.");
   }catch(err){
     showMsg("fail", err.message, " Confira sua conexão e tente de novo. Se continuar, fale com a equipe de Facilities da Yuca.");
   }finally{
