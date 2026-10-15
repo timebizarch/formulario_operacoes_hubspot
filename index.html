@@ -113,6 +113,10 @@
   .alert strong{display:block;margin-bottom:2px}
   .empty{display:flex;gap:14px;align-items:center;color:var(--fg2)}
   .empty svg{width:32px;height:32px;stroke:var(--fg3);fill:none;stroke-width:1.5;flex:none}
+  .slack-note{display:flex;gap:12px;align-items:flex-start;background:var(--bg1);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;margin:0 0 24px;font-size:14px;color:var(--fg2)}
+  .slack-note svg{width:20px;height:20px;flex:none;margin-top:1px;stroke:var(--accent-fg);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+  .slack-note a,.alert a{color:var(--mor-deep);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+  .alert .slack-link{display:block;margin-top:8px}
   footer{margin-top:32px;color:var(--fg3);font-size:13px}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -124,6 +128,8 @@
   <p class="eyebrow">Central de solicitações</p>
   <h1>Do que o imóvel precisa?</h1>
   <p class="lead">Escolha o tipo de pedido e preencha os dados. Cada envio vira um chamado para a equipe responsável da Yuca.</p>
+  <p class="slack-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>Time Yuca: todo pedido enviado aqui aparece no canal <a href="https://yucalovers.slack.com/archives/C0C9M3CCP97" target="_blank" rel="noopener">#formulario-facilities-manutenção</a> do Slack, com o link do chamado. Acompanhe e tire dúvidas por lá.</span></p>
 
   <div class="types" role="group" aria-label="Tipo de pedido">
     <button type="button" class="type" data-tipo="manutencao" aria-pressed="false">
@@ -427,9 +433,11 @@ function comprimir(file){
   });
 }
 
+const SLACK_CANAL = "https://yucalovers.slack.com/archives/C0C9M3CCP97";
 function showMsg(kind, title, text){
   const m = $("#msg"); m.className = "alert " + kind; m.hidden = false;
-  m.innerHTML = `<strong>${esc(title)}</strong>${esc(text)}`;
+  m.innerHTML = `<strong>${esc(title)}</strong>${esc(text)}` +
+    (kind === "ok" ? `<span class="slack-link">Se você é do time Yuca, acompanhe o pedido no canal <a href="${SLACK_CANAL}" target="_blank" rel="noopener">#formulario-facilities-manutenção</a> do Slack.</span>` : "");
 }
 
 document.querySelectorAll(".type").forEach(b=>b.addEventListener("click",()=>render(b.dataset.tipo)));
