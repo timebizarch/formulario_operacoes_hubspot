@@ -152,6 +152,53 @@
          "y": -300
         }
        }
+      },
+      {
+       "id": 12,
+       "module": "slack:CreateMessage",
+       "version": 4,
+       "parameters": {
+        "__IMTCONN__": 1333182
+       },
+       "mapper": {
+        "text": ":key: *Novo pedido de chave* (formulário externo) <!subteam^S02FQQ5M013>\n• *Unidade:* {{1.produto_nome}}\n• *Solicitante:* {{1.chave_solicitante}} ({{capitalize(replace(1.chave_chapter; \"_\"; \" \"))}}){{if(1.chave_telefone; \" · \"; \"\")}}{{1.chave_telefone}}\n• *Status da chave:* {{replace(replace(1.chave_status; \";\"; \", \"); \"_\"; \" \")}}\n• *Data:* {{formatDate(parseDate(1.chave_data_evento; \"YYYY-MM-DD\"); \"DD/MM/YYYY\")}}\n• *Quem retira/devolve:* {{1.chave_dono_info}}\n<https://app.hubspot.com/contacts/50709614/record/0-5/{{10.id}}|Abrir ticket no HubSpot>",
+        "parse": false,
+        "mrkdwn": true,
+        "channel": "COLE_AQUI_O_ID_DO_CANAL",
+        "channelType": "public",
+        "channelWType": "manualy"
+       },
+       "metadata": {
+        "designer": {
+         "x": 1500,
+         "y": -300
+        }
+       }
+      },
+      {
+       "id": 13,
+       "module": "hubspotcrm:UpdateTicket",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "_method": "compact",
+        "ticketId": "{{10.id}}",
+        "properties": [
+         {
+          "key": "integracao_thread_slack_timestamp",
+          "value": "{{12.ts}}"
+         }
+        ],
+        "parseCustomFields": true
+       },
+       "metadata": {
+        "designer": {
+         "x": 1800,
+         "y": -300
+        }
+       }
       }
      ]
     },
@@ -295,6 +342,53 @@
          "y": -100
         }
        }
+      },
+      {
+       "id": 22,
+       "module": "slack:CreateMessage",
+       "version": 4,
+       "parameters": {
+        "__IMTCONN__": 1333182
+       },
+       "mapper": {
+        "text": ":shopping_trolley: *Novo pedido de compra* (formulário externo) <!subteam^S02FQQ5M013>\n• *Unidade:* {{1.produto_nome}}\n• *Solicitante:* {{1.quem_solicitou}} ({{upper(1.chapter_solicitante)}}) · {{1.compras_email_solicitante}}\n• *O que comprar:* {{1.compras_item}}\n• *Categoria:* {{capitalize(replace(1.compras_categoria; \"_\"; \" \"))}} · *Custo:* {{capitalize(replace(1.de_quem_custo; \"_\"; \" \"))}}\n• *Prioridade:* {{replace(replace(1.compras_etiqueta; \";\"; \", \"); \"_\"; \" \")}}\n<https://app.hubspot.com/contacts/50709614/record/0-5/{{20.id}}|Abrir ticket no HubSpot>",
+        "parse": false,
+        "mrkdwn": true,
+        "channel": "COLE_AQUI_O_ID_DO_CANAL",
+        "channelType": "public",
+        "channelWType": "manualy"
+       },
+       "metadata": {
+        "designer": {
+         "x": 1500,
+         "y": -100
+        }
+       }
+      },
+      {
+       "id": 23,
+       "module": "hubspotcrm:UpdateTicket",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "_method": "compact",
+        "ticketId": "{{20.id}}",
+        "properties": [
+         {
+          "key": "integracao_thread_slack_timestamp",
+          "value": "{{22.ts}}"
+         }
+        ],
+        "parseCustomFields": true
+       },
+       "metadata": {
+        "designer": {
+         "x": 1800,
+         "y": -100
+        }
+       }
       }
      ]
     },
@@ -431,6 +525,53 @@
        "metadata": {
         "designer": {
          "x": 1200,
+         "y": 100
+        }
+       }
+      },
+      {
+       "id": 32,
+       "module": "slack:CreateMessage",
+       "version": 4,
+       "parameters": {
+        "__IMTCONN__": 1333182
+       },
+       "mapper": {
+        "text": ":broom: *Nova solicitação de serviço* (formulário externo) <!subteam^S02FQQ5M013>\n• *Unidade:* {{1.produto_nome}}\n• *Solicitante:* {{1.quem_solicitou}} ({{upper(1.chapter_solicitante)}})\n• *Serviço:* {{capitalize(replace(1.qual_servico; \"_\"; \" \"))}}\n• *Data:* {{formatDate(parseDate(1.data_solicitada; \"YYYY-MM-DD\"); \"DD/MM/YYYY\")}} às {{1.horario_solicitado}}\n• *Custo:* {{capitalize(replace(1.de_quem_custo; \"_\"; \" \"))}} · *Prioridade:* {{replace(replace(1.adicionar_etiqueta; \";\"; \", \"); \"_\"; \" \")}}\n<https://app.hubspot.com/contacts/50709614/record/0-5/{{30.id}}|Abrir ticket no HubSpot>",
+        "parse": false,
+        "mrkdwn": true,
+        "channel": "COLE_AQUI_O_ID_DO_CANAL",
+        "channelType": "public",
+        "channelWType": "manualy"
+       },
+       "metadata": {
+        "designer": {
+         "x": 1500,
+         "y": 100
+        }
+       }
+      },
+      {
+       "id": 33,
+       "module": "hubspotcrm:UpdateTicket",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "_method": "compact",
+        "ticketId": "{{30.id}}",
+        "properties": [
+         {
+          "key": "integracao_thread_slack_timestamp",
+          "value": "{{32.ts}}"
+         }
+        ],
+        "parseCustomFields": true
+       },
+       "metadata": {
+        "designer": {
+         "x": 1800,
          "y": 100
         }
        }
@@ -575,6 +716,53 @@
        "metadata": {
         "designer": {
          "x": 1200,
+         "y": 300
+        }
+       }
+      },
+      {
+       "id": 52,
+       "module": "slack:CreateMessage",
+       "version": 4,
+       "parameters": {
+        "__IMTCONN__": 1333182
+       },
+       "mapper": {
+        "text": ":wrench: *Novo chamado de manutenção* (formulário externo) <!subteam^S036K4Z608N>\n• *Unidade:* {{1.produto_nome}}\n• *Solicitante:* {{1.nome_do_solicitante}} ({{1.tipo_de_cliente}}) · {{1.manut_telefone}} · {{1.manut_email}}\n• *Problema:* {{1.tipo_de_chamado}} · *Momento:* {{1.momento_da_manutencao}} · *Prioridade:* {{switch(1.hs_ticket_priority; \"LOW\"; \"Baixa\"; \"MEDIUM\"; \"Média\"; \"HIGH\"; \"Alta\"; \"URGENT\"; \"Urgente\")}}\n• *Descrição:* {{1.descricao_do_problema}}\n• *Horários para visita:* {{ifempty(1.horarios_disponiveis_para_visita; \"-\")}}\n<https://app.hubspot.com/contacts/50709614/record/0-5/{{50.id}}|Abrir ticket no HubSpot>",
+        "parse": false,
+        "mrkdwn": true,
+        "channel": "COLE_AQUI_O_ID_DO_CANAL",
+        "channelType": "public",
+        "channelWType": "manualy"
+       },
+       "metadata": {
+        "designer": {
+         "x": 1500,
+         "y": 300
+        }
+       }
+      },
+      {
+       "id": 53,
+       "module": "hubspotcrm:UpdateTicket",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "_method": "compact",
+        "ticketId": "{{50.id}}",
+        "properties": [
+         {
+          "key": "integracao_thread_slack_timestamp",
+          "value": "{{52.ts}}"
+         }
+        ],
+        "parseCustomFields": true
+       },
+       "metadata": {
+        "designer": {
+         "x": 1800,
          "y": 300
         }
        }
@@ -786,6 +974,22 @@
          "x": 1800,
          "y": 600
         }
+       },
+       "filter": {
+        "name": "Upload ok",
+        "conditions": [
+         [
+          {
+           "a": "{{60.statusCode}}",
+           "b": "300",
+           "o": "number:less"
+          },
+          {
+           "a": "{{60.data.id}}",
+           "o": "exist"
+          }
+         ]
+        ]
        }
       },
       {
@@ -812,6 +1016,18 @@
          "x": 2100,
          "y": 600
         }
+       },
+       "filter": {
+        "name": "Nota criada",
+        "conditions": [
+         [
+          {
+           "a": "{{61.statusCode}}",
+           "b": "300",
+           "o": "number:less"
+          }
+         ]
+        ]
        }
       }
      ]
