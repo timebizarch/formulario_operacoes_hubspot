@@ -89,6 +89,16 @@
   .combo-list .none:hover{background:none}
   .picked{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--mor-deep);font-weight:600}
   .picked::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  /* fotos (opcional) */
+  .drop{display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;border:1.5px dashed var(--border-strong);border-radius:var(--r-md);
+    background:var(--bg2);color:var(--fg2);font-size:14px;font-weight:600;cursor:pointer;text-align:center}
+  .drop:hover,.drop.over{border-color:var(--accent);background:var(--bg3);color:var(--mor-deep)}
+  .drop svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.5;flex:none}
+  .drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+  .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:10px}
+  .thumb{position:relative;aspect-ratio:1;max-width:100%;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border)}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(6,40,64,.75);color:#fff;font:700 14px/24px var(--font-body);cursor:pointer}
   .actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:24px;padding-top:24px;border-top:1px solid var(--border)}
   .submit{border:0;border-radius:var(--r-md);padding:14px 28px;background:var(--accent);color:var(--fg1);font:700 16px var(--font-body);cursor:pointer;
     transition:background .2s var(--ease)}
@@ -163,6 +173,8 @@ const UNIDADE = {name:"produto", label:"Unidade", type:"produto", required:true,
 // Unidade → Solicitante → Pedido → Data → Prioridade e custo → Informações adicionais
 const SEC = t => ({section:t});
 const PRIORIDADE_LBL = "Prioridade";
+const FOTOS = {name:"fotos", label:"Fotos", type:"fotos", required:false, hint:"Até 5 imagens. Elas são reduzidas antes do envio."};
+const MAX_FOTOS = 5;
 const OUTRAS = name => ({name, label:"Outras informações", type:"textarea", required:false, placeholder:"Qualquer detalhe que ajude a equipe"});
 
 const FORMS = {
@@ -186,6 +198,7 @@ const FORMS = {
     SEC("Prioridade"),
     {name:"hs_ticket_priority", label:PRIORIDADE_LBL, type:"select", required:true, options:[["LOW","Baixa"],["MEDIUM","Média"],["HIGH","Alta"],["URGENT","Urgente (risco à segurança ou ao imóvel)"]]},
     SEC("Informações adicionais"),
+    FOTOS,
     {name:"fotos_manutencao__drive_url", label:"Link das fotos ou vídeos", type:"url", required:false, hint:"Link de uma pasta do Google Drive, por exemplo"}
   ]},
   servico: { title:"Solicitação de serviço", fields:[
@@ -208,6 +221,7 @@ const FORMS = {
     {name:"adicionar_etiqueta", label:PRIORIDADE_LBL, type:"checks", required:true, options:[["Prioridade alta","Prioridade alta"],["Importante, não urgente","Importante, não urgente"],["Fluxo normal","Fluxo normal"],["Coliving","Coliving"],["Re-limpeza","Re-limpeza"]]},
     {name:"de_quem_custo", label:"De quem é o custo?", type:"select", required:true, options:CUSTO},
     SEC("Informações adicionais"),
+    FOTOS,
     OUTRAS("outras_informacoes")
   ]},
   compras: { title:"Pedido de compra", fields:[
@@ -228,6 +242,7 @@ const FORMS = {
     {name:"compras_etiqueta", label:PRIORIDADE_LBL, type:"checks", required:true, options:[["prioridade_alta","Prioridade alta"],["importante_nao_urgente","Importante, não urgente"],["fluxo_normal","Fluxo normal"]]},
     {name:"de_quem_custo", label:"De quem é o custo?", type:"select", required:true, options:CUSTO},
     SEC("Informações adicionais"),
+    FOTOS,
     OUTRAS("outras_informacoes")
   ]},
   chave: { title:"Pedido de chave", fields:[
@@ -263,6 +278,14 @@ function fieldHTML(f){
       <div class="picked" id="produto-picked" hidden></div>
       <div class="err">Escolha a unidade na lista.</div></div>`;
   }
+  if (f.type==="fotos"){
+    return `<div class="field" data-field="fotos" data-type="fotos">
+      <span class="legend">${esc(f.label)}${opt}</span>
+      <label class="drop" for="f_fotos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="m21 16-5-5-8 8"/></svg>
+        <span id="fotos-txt">Toque para escolher fotos ou arraste aqui</span>
+        <input id="f_fotos" type="file" accept="image/*" multiple></label>
+      <div class="thumbs" id="fotos-thumbs"></div>${hint}</div>`;
+  }
   if (f.type==="checks"){
     return `<div class="field" data-field="${f.name}" data-required="${f.required}" data-type="checks"><span class="legend">${esc(f.label)}${opt}</span>
       <div class="checks">${f.options.map(([v,l])=>`<label><input type="checkbox" name="${f.name}" value="${esc(v)}">${esc(l)}</label>`).join("")}</div>${hint}${err}</div>`;
@@ -281,7 +304,7 @@ function render(t){
   $("#title").textContent = cfg.title;
   $("#fields").innerHTML = cfg.fields.map(f => f.section ? `<h3 class="section">${esc(f.section)}</h3>` : f.row ? `<div class="row">${f.row.map(fieldHTML).join("")}</div>` : fieldHTML(f)).join("");
   $("#empty").hidden = true; $("#head").hidden = false; $("#actions").hidden = false; $("#msg").hidden = true;
-  produtoEscolhido = null; setupCombo();
+  produtoEscolhido = null; setupCombo(); fotosSel = []; setupFotos();
   $("#form").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
 }
 
@@ -289,6 +312,7 @@ function collect(){
   const data = {}; let first = null;
   document.querySelectorAll("#fields .field").forEach(el=>{
     const name = el.dataset.field, type = el.dataset.type;
+    if (type==="fotos") return;
     if (type==="produto"){
       const ok = !!produtoEscolhido && $("#f_produto").value === produtoEscolhido.label;
       el.classList.toggle("invalid", !ok);
@@ -364,6 +388,45 @@ function setupCombo(){
   input.addEventListener("blur", () => setTimeout(close, 120));
 }
 
+// ---------- Fotos (opcional) ----------
+let fotosSel = [];
+function setupFotos(){
+  const input = $("#f_fotos"); if (!input) return;
+  const drop = input.closest(".drop"), thumbs = $("#fotos-thumbs"), txt = $("#fotos-txt");
+  const paint = () => {
+    thumbs.innerHTML = fotosSel.map((f,i)=>`<div class="thumb"><img alt="${esc(f.name)}" src="${f.url}"><button type="button" data-i="${i}" aria-label="Remover foto ${i+1}">×</button></div>`).join("");
+    txt.textContent = fotosSel.length ? `${fotosSel.length} de ${MAX_FOTOS} fotos · toque para adicionar mais` : "Toque para escolher fotos ou arraste aqui";
+  };
+  const add = files => {
+    for (const f of files){
+      if (fotosSel.length >= MAX_FOTOS) break;
+      if (!f.type.startsWith("image/")) continue;
+      fotosSel.push({file:f, name:f.name, url:URL.createObjectURL(f)});
+    }
+    paint();
+  };
+  input.addEventListener("change", () => { add(input.files); input.value = ""; });
+  thumbs.addEventListener("click", e => { const b = e.target.closest("button[data-i]"); if (b){ URL.revokeObjectURL(fotosSel[+b.dataset.i].url); fotosSel.splice(+b.dataset.i,1); paint(); } });
+  ["dragover","dragenter"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => add(e.dataTransfer.files));
+  paint();
+}
+// reduz para no máximo 1600px e JPEG 0,8; devolve base64 sem o prefixo "data:"
+function comprimir(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas"); c.width = Math.round(img.naturalWidth*k); c.height = Math.round(img.naturalHeight*k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      resolve(c.toDataURL("image/jpeg", 0.8).split(",")[1]);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("formato não suportado")); };
+    img.src = url;
+  });
+}
+
 function showMsg(kind, title, text){
   const m = $("#msg"); m.className = "alert " + kind; m.hidden = false;
   m.innerHTML = `<strong>${esc(title)}</strong>${esc(text)}`;
@@ -382,11 +445,31 @@ $("#form").addEventListener("submit", async e=>{
   try{
     // form-urlencoded é uma requisição "simples": o navegador não faz preflight de CORS
     const r = await fetch(WEBHOOK_URL, {method:"POST", body});
-    let res = {}; try{ res = await r.json(); }catch(_){}
-    if (!r.ok || !res.ok) throw new Error(res.erro || "Não foi possível registrar o pedido.");
+    const texto = await r.text(); let res = {}; try{ res = JSON.parse(texto); }catch(_){}
+    // "Accepted" = o Make recebeu o pedido, mas ainda vai processar (fila). Não é erro: não pedir para reenviar.
+    const naFila = r.ok && !res.ok && /accepted/i.test(texto);
+    if (!naFila && (!r.ok || !res.ok)) throw new Error(res.erro || "Não foi possível registrar o pedido.");
+    // fotos: uma chamada por foto, depois que o chamado existe (na fila ainda não há nº do chamado)
+    let falhas = 0; const total = naFila ? 0 : fotosSel.length; const fotosPerdidas = naFila ? fotosSel.length : 0;
+    for (let i = 0; i < total; i++){
+      btn.textContent = `Enviando fotos ${i+1} de ${total}…`;
+      try{
+        const foto = await comprimir(fotosSel[i].file);
+        const nome = `foto-${i+1}-${fotosSel[i].name.replace(/\.[^.]+$/,"").replace(/[^\w-]+/g,"_").slice(0,40)}.jpg`;
+        const rf = await fetch(WEBHOOK_URL, {method:"POST", body:new URLSearchParams({tipo:"foto", ticket:res.ticket, chave:res.chave||"", indice:String(i+1), total:String(total), nome, foto})});
+        let jf = {}; try{ jf = await rf.json(); }catch(_){}
+        if (!rf.ok || !jf.ok) falhas++;
+      }catch(_){ falhas++; }
+    }
+    fotosSel.forEach(f=>URL.revokeObjectURL(f.url)); fotosSel = [];
     $("#fields").innerHTML = ""; $("#head").hidden = true; $("#actions").hidden = true; $("#empty").hidden = false;
     document.querySelectorAll(".type").forEach(b=>b.setAttribute("aria-pressed","false")); tipo = null;
-    showMsg("ok", `Pedido enviado. Chamado nº ${res.ticket}.`, " A equipe da Yuca vai dar sequência e entrar em contato se precisar de mais informações.");
+    if (naFila) showMsg("ok", "Pedido recebido.", " Ele vai virar um chamado em alguns minutos. Não precisa enviar de novo." +
+      (fotosPerdidas ? " As fotos não puderam ser anexadas agora; mande para a equipe de Facilities." : ""));
+    else showMsg("ok", `Pedido enviado. Chamado nº ${res.ticket}.`,
+      (total && !falhas ? ` ${total === 1 ? "A foto foi anexada" : `As ${total} fotos foram anexadas`} ao chamado.` : "") +
+      (falhas ? ` ${falhas} de ${total} fotos não foram enviadas; mande para a equipe de Facilities junto com o número do chamado.` : "") +
+      " A equipe da Yuca vai dar sequência e entrar em contato se precisar de mais informações.");
   }catch(err){
     showMsg("fail", err.message, " Confira sua conexão e tente de novo. Se continuar, fale com a equipe de Facilities da Yuca.");
   }finally{
