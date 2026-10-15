@@ -134,7 +134,7 @@
        "parameters": {},
        "mapper": {
         "status": "200",
-        "body": "{\"ok\": true, \"ticket\": \"{{10.id}}\"}",
+        "body": "{\"ok\": true, \"ticket\": \"{{10.id}}\", \"chave\": \"{{sha256(10.id; \"hex\"; \"COLE_AQUI_O_SEGREDO\")}}\"}",
         "headers": [
          {
           "key": "Content-Type",
@@ -277,7 +277,7 @@
        "parameters": {},
        "mapper": {
         "status": "200",
-        "body": "{\"ok\": true, \"ticket\": \"{{20.id}}\"}",
+        "body": "{\"ok\": true, \"ticket\": \"{{20.id}}\", \"chave\": \"{{sha256(20.id; \"hex\"; \"COLE_AQUI_O_SEGREDO\")}}\"}",
         "headers": [
          {
           "key": "Content-Type",
@@ -416,7 +416,7 @@
        "parameters": {},
        "mapper": {
         "status": "200",
-        "body": "{\"ok\": true, \"ticket\": \"{{30.id}}\"}",
+        "body": "{\"ok\": true, \"ticket\": \"{{30.id}}\", \"chave\": \"{{sha256(30.id; \"hex\"; \"COLE_AQUI_O_SEGREDO\")}}\"}",
         "headers": [
          {
           "key": "Content-Type",
@@ -560,7 +560,7 @@
        "parameters": {},
        "mapper": {
         "status": "200",
-        "body": "{\"ok\": true, \"ticket\": \"{{50.id}}\"}",
+        "body": "{\"ok\": true, \"ticket\": \"{{50.id}}\", \"chave\": \"{{sha256(50.id; \"hex\"; \"COLE_AQUI_O_SEGREDO\")}}\"}",
         "headers": [
          {
           "key": "Content-Type",
@@ -576,6 +576,155 @@
         "designer": {
          "x": 1200,
          "y": 300
+        }
+       }
+      }
+     ]
+    },
+    {
+     "flow": [
+      {
+       "id": 60,
+       "module": "http:ActionSendData",
+       "version": 3,
+       "parameters": {},
+       "filter": {
+        "name": "Foto válida",
+        "conditions": [
+         [
+          {
+           "a": "{{1.tipo}}",
+           "b": "foto",
+           "o": "text:equal"
+          },
+          {
+           "a": "{{1.website}}",
+           "o": "notexist"
+          },
+          {
+           "a": "{{1.ticket}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.foto}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.chave}}",
+           "b": "{{sha256(1.ticket; \"hex\"; \"COLE_AQUI_O_SEGREDO\")}}",
+           "o": "text:equal"
+          }
+         ]
+        ]
+       },
+       "mapper": {
+        "ca": "",
+        "qs": [],
+        "gzip": true,
+        "timeout": "",
+        "useMtls": false,
+        "serializeUrl": false,
+        "shareCookies": false,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "followAllRedirects": false,
+        "rejectUnauthorized": true,
+        "parseResponse": true,
+        "url": "https://api.hubapi.com/files/v3/files",
+        "method": "post",
+        "headers": [
+         {
+          "name": "Authorization",
+          "value": "Bearer COLE_AQUI_O_TOKEN_DO_HUBSPOT"
+         }
+        ],
+        "bodyType": "multipart_form_data",
+        "formDataFields": [
+         {
+          "key": "folderPath",
+          "value": "/formulario-externo/{{1.ticket}}",
+          "fieldType": "text"
+         },
+         {
+          "key": "options",
+          "value": "{\"access\":\"PRIVATE\"}",
+          "fieldType": "text"
+         },
+         {
+          "key": "file",
+          "data": "{{toBinary(1.foto; \"base64\")}}",
+          "fileName": "{{ifempty(1.nome; \"foto.jpg\")}}",
+          "fieldType": "file"
+         }
+        ]
+       },
+       "metadata": {
+        "designer": {
+         "x": 600,
+         "y": 600
+        }
+       }
+      },
+      {
+       "id": 61,
+       "module": "http:ActionSendData",
+       "version": 3,
+       "parameters": {},
+       "mapper": {
+        "ca": "",
+        "qs": [],
+        "gzip": true,
+        "timeout": "",
+        "useMtls": false,
+        "serializeUrl": false,
+        "shareCookies": false,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "followAllRedirects": false,
+        "rejectUnauthorized": true,
+        "parseResponse": true,
+        "url": "https://api.hubapi.com/crm/v3/objects/notes",
+        "method": "post",
+        "headers": [
+         {
+          "name": "Authorization",
+          "value": "Bearer COLE_AQUI_O_TOKEN_DO_HUBSPOT"
+         }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "data": "{\"properties\":{\"hs_timestamp\":\"{{formatDate(now; \"YYYY-MM-DDTHH:mm:ss.SSSZ\")}}\",\"hs_note_body\":\"Foto enviada pelo formulário externo ({{1.indice}} de {{1.total}})\",\"hs_attachment_ids\":\"{{60.data.id}}\"},\"associations\":[{\"to\":{\"id\":\"{{1.ticket}}\"},\"types\":[{\"associationCategory\":\"HUBSPOT_DEFINED\",\"associationTypeId\":228}]}]}"
+       },
+       "metadata": {
+        "designer": {
+         "x": 900,
+         "y": 600
+        }
+       }
+      },
+      {
+       "id": 62,
+       "module": "gateway:WebhookRespond",
+       "version": 1,
+       "parameters": {},
+       "mapper": {
+        "status": "200",
+        "body": "{\"ok\": true, \"arquivo\": \"{{60.data.id}}\"}",
+        "headers": [
+         {
+          "key": "Content-Type",
+          "value": "application/json"
+         },
+         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+         }
+        ]
+       },
+       "metadata": {
+        "designer": {
+         "x": 1200,
+         "y": 600
         }
        }
       }
@@ -636,6 +785,11 @@
           {
            "a": "{{1.tipo}}",
            "b": "manutencao",
+           "o": "text:notequal"
+          },
+          {
+           "a": "{{1.tipo}}",
+           "b": "foto",
            "o": "text:notequal"
           }
          ]
