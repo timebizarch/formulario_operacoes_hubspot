@@ -666,6 +666,92 @@
        }
       },
       {
+       "id": 63,
+       "module": "hubspotcrm:MakeAPICall",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "filter": {
+        "name": "Upload ok",
+        "conditions": [
+         [
+          {
+           "a": "{{60.statusCode}}",
+           "b": "300",
+           "o": "number:less"
+          },
+          {
+           "a": "{{60.data.id}}",
+           "o": "exist"
+          }
+         ]
+        ]
+       },
+       "mapper": {
+        "url": "/crm/v3/objects/tickets/{{1.ticket}}?properties=hs_pipeline,anexos,compras_anexo,anexo",
+        "method": "GET",
+        "headers": [
+         {
+          "key": "Content-Type",
+          "value": "application/json"
+         }
+        ]
+       },
+       "metadata": {
+        "designer": {
+         "x": 900,
+         "y": 600
+        }
+       }
+      },
+      {
+       "id": 64,
+       "module": "util:SetVariables",
+       "version": 1,
+       "parameters": {},
+       "mapper": {
+        "variables": [
+         {
+          "name": "campo",
+          "value": "{{switch(63.body.properties.hs_pipeline; \"888510978\"; \"anexos\"; \"922963636\"; \"compras_anexo\"; \"916347175\"; \"anexo\"; \"anexos\")}}"
+         }
+        ],
+        "scope": "roundtrip"
+       },
+       "metadata": {
+        "designer": {
+         "x": 1200,
+         "y": 600
+        }
+       }
+      },
+      {
+       "id": 65,
+       "module": "hubspotcrm:UpdateTicket",
+       "version": 2,
+       "parameters": {
+        "__IMTCONN__": 4707737
+       },
+       "mapper": {
+        "_method": "compact",
+        "ticketId": "{{1.ticket}}",
+        "parseCustomFields": true,
+        "properties": [
+         {
+          "key": "{{64.campo}}",
+          "value": "{{get(63.body.properties; 64.campo)}}{{if(get(63.body.properties; 64.campo); \";\"; \"\")}}{{60.data.id}}"
+         }
+        ]
+       },
+       "metadata": {
+        "designer": {
+         "x": 1500,
+         "y": 600
+        }
+       }
+      },
+      {
        "id": 61,
        "module": "http:ActionSendData",
        "version": 3,
@@ -697,7 +783,7 @@
        },
        "metadata": {
         "designer": {
-         "x": 900,
+         "x": 1800,
          "y": 600
         }
        }
@@ -723,7 +809,7 @@
        },
        "metadata": {
         "designer": {
-         "x": 1200,
+         "x": 2100,
          "y": 600
         }
        }
