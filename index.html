@@ -445,10 +445,12 @@ $("#form").addEventListener("submit", async e=>{
   try{
     // form-urlencoded é uma requisição "simples": o navegador não faz preflight de CORS
     const r = await fetch(WEBHOOK_URL, {method:"POST", body});
-    let res = {}; try{ res = await r.json(); }catch(_){}
-    if (!r.ok || !res.ok) throw new Error(res.erro || "Não foi possível registrar o pedido.");
-    // fotos: uma chamada por foto, depois que o chamado existe
-    let falhas = 0; const total = fotosSel.length;
+    const texto = await r.text(); let res = {}; try{ res = JSON.parse(texto); }catch(_){}
+    // "Accepted" = o Make recebeu o pedido, mas ainda vai processar (fila). Não é erro: não pedir para reenviar.
+    const naFila = r.ok && !res.ok && /accepted/i.test(texto);
+    if (!naFila && (!r.ok || !res.ok)) throw new Error(res.erro || "Não foi possível registrar o pedido.");
+    // fotos: uma chamada por foto, depois que o chamado existe (na fila ainda não há nº do chamado)
+    let falhas = 0; const total = naFila ? 0 : fotosSel.length; const fotosPerdidas = naFila ? fotosSel.length : 0;
     for (let i = 0; i < total; i++){
       btn.textContent = `Enviando fotos ${i+1} de ${total}…`;
       try{
@@ -462,7 +464,9 @@ $("#form").addEventListener("submit", async e=>{
     fotosSel.forEach(f=>URL.revokeObjectURL(f.url)); fotosSel = [];
     $("#fields").innerHTML = ""; $("#head").hidden = true; $("#actions").hidden = true; $("#empty").hidden = false;
     document.querySelectorAll(".type").forEach(b=>b.setAttribute("aria-pressed","false")); tipo = null;
-    showMsg("ok", `Pedido enviado. Chamado nº ${res.ticket}.`,
+    if (naFila) showMsg("ok", "Pedido recebido.", " Ele vai virar um chamado em alguns minutos. Não precisa enviar de novo." +
+      (fotosPerdidas ? " As fotos não puderam ser anexadas agora; mande para a equipe de Facilities." : ""));
+    else showMsg("ok", `Pedido enviado. Chamado nº ${res.ticket}.`,
       (total && !falhas ? ` ${total === 1 ? "A foto foi anexada" : `As ${total} fotos foram anexadas`} ao chamado.` : "") +
       (falhas ? ` ${falhas} de ${total} fotos não foram enviadas; mande para a equipe de Facilities junto com o número do chamado.` : "") +
       " A equipe da Yuca vai dar sequência e entrar em contato se precisar de mais informações.");
