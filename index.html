@@ -89,6 +89,13 @@
   .combo-list .none:hover{background:none}
   .picked{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--mor-deep);font-weight:600}
   .picked::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .fora-lista{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;font-weight:500;color:var(--fg2);cursor:pointer}
+  .fora-lista input{accent-color:var(--mor-teal);margin:0}
+  .manual{display:grid;gap:12px;margin-top:12px;padding:14px;border:1px dashed var(--border-strong);border-radius:var(--r-md);background:var(--bg2)}
+  .manual .sub label{font-size:13px}
+  .manual .sub.invalid input{border-color:var(--status-error)}
+  .manual .sub .err{display:none}
+  .manual .sub.invalid .err{display:block}
   /* fotos (opcional) */
   .drop{display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;border:1.5px dashed var(--border-strong);border-radius:var(--r-md);
     background:var(--bg2);color:var(--fg2);font-size:14px;font-weight:600;cursor:pointer;text-align:center}
@@ -173,6 +180,8 @@ const CHAPTER_CHAVE = [["sales","Sales"],["community","Community"],["engenharia"
 const CHAPTER = [["cx","CX"],["dc","DC"],["people","People"],["finance","Finance"],["cs","CS"]];
 const CUSTO = [["proprietario","Proprietário"],["yuca","Yuca"],["yuker","Yuker"],["condominio","Condomínio"]];
 // Unidade = Produto do HubSpot (lista em products.json, atualizada todo dia pela GitHub Action)
+// Formulários que já têm campo de endereço: quando a unidade não está na lista, ele vira obrigatório
+const ENDERECO_PROPRIO = {compras:"compras_endereco", servico:"endereco_servico"};
 const UNIDADE = {name:"produto", label:"Unidade", type:"produto", required:true, placeholder:"Digite o nome do prédio ou da unidade"};
 
 // Todos os formulários seguem a mesma ordem de seções:
@@ -282,7 +291,17 @@ function fieldHTML(f){
       <input id="f_produto" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="produto-list"${ph}>
       <ul class="combo-list" id="produto-list" role="listbox" hidden></ul>
       <div class="picked" id="produto-picked" hidden></div>
-      <div class="err">Escolha a unidade na lista.</div></div>`;
+      <div class="err" id="produto-err">Escolha a unidade na lista.</div>
+      <label class="fora-lista"><input type="checkbox" id="f_fora_lista"> Não encontrei a unidade na lista</label>
+      <div class="manual" id="unidade-manual" hidden>
+        <div class="sub" data-sub="unidade_manual"><label for="f_unidade_manual">Nome da unidade ou do prédio</label>
+          <input id="f_unidade_manual" type="text" maxlength="200" placeholder="Ex.: Edifício Aurora, apto 52">
+          <div class="err">Informe o nome da unidade ou do prédio.</div></div>
+        ${ENDERECO_PROPRIO[tipo] ? `<div class="hint" style="margin:0">Preencha também o <b>Endereço</b> logo abaixo: ele passa a ser obrigatório.</div>` :
+        `<div class="sub" data-sub="endereco_manual"><label for="f_endereco_manual">Endereço completo</label>
+          <input id="f_endereco_manual" type="text" maxlength="300" placeholder="Rua, número, complemento, bairro, cidade e CEP">
+          <div class="err">Informe o endereço completo.</div></div>`}
+      </div></div>`;
   }
   if (f.type==="fotos"){
     return `<div class="field" data-field="fotos" data-type="fotos">
@@ -320,6 +339,16 @@ function collect(){
     const name = el.dataset.field, type = el.dataset.type;
     if (type==="fotos") return;
     if (type==="produto"){
+      if ($("#f_fora_lista").checked){
+        // unidade fora da lista: nome + endereço completo
+        el.classList.remove("invalid"); let okManual = true;
+        el.querySelectorAll(".manual .sub").forEach(sub=>{
+          const v = sub.querySelector("input").value.trim(); const bad = v.length < 3;
+          sub.classList.toggle("invalid", bad); if (bad){ okManual = false; } else data[sub.dataset.sub] = v;
+        });
+        if (!okManual) first = first || el;
+        return;
+      }
       const ok = !!produtoEscolhido && $("#f_produto").value === produtoEscolhido.label;
       el.classList.toggle("invalid", !ok);
       if (!ok) first = first || el;
@@ -329,7 +358,7 @@ function collect(){
     const v = type==="checks"
       ? [...el.querySelectorAll("input:checked")].map(i=>i.value).join(";")
       : el.querySelector("input,select,textarea").value.trim();
-    let bad = el.dataset.required==="true" && !v;
+    let bad = (el.dataset.required==="true" || (name===ENDERECO_PROPRIO[tipo] && $("#f_fora_lista")?.checked)) && !v;
     if (!bad && v && type==="email") bad = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
     if (!bad && v && type==="url") bad = !/^https?:\/\/\S+$/i.test(v);
     el.classList.toggle("invalid", bad);
@@ -353,6 +382,16 @@ const produtosPromise = fetch("products.json", {cache:"no-cache"}).then(r=>r.jso
 
 function setupCombo(){
   const input = $("#f_produto"); if (!input) return;
+  const fora = $("#f_fora_lista"), manual = $("#unidade-manual");
+  fora.addEventListener("change", () => {
+    const on = fora.checked;
+    manual.hidden = !on; input.hidden = on; $("#produto-list").hidden = true;
+    $("#produto-err").textContent = on ? "" : "Escolha a unidade na lista.";
+    if (on){ produtoEscolhido = null; input.value = ""; $("#produto-picked").hidden = true; input.closest(".field").classList.remove("invalid"); $("#f_unidade_manual").focus(); }
+    else input.focus();
+    const end = ENDERECO_PROPRIO[tipo] && document.querySelector(`[data-field="${ENDERECO_PROPRIO[tipo]}"] label`);
+    if (end){ if (!end.dataset.orig) end.dataset.orig = end.innerHTML; end.innerHTML = on ? "Endereço" : end.dataset.orig; }
+  });
   const list = $("#produto-list"), picked = $("#produto-picked"), field = input.closest(".field");
   let matches = [], active = -1;
   const close = () => { list.hidden = true; input.setAttribute("aria-expanded","false"); active = -1; };
